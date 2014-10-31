@@ -1811,7 +1811,8 @@ class stock_move(osv.osv):
             default = {}
         default = default.copy()
         default.setdefault('tracking_id', False)
-        default.setdefault('prodlot_id', False)
+        if not context.get('keep_prodlot', False):
+            default.setdefault('prodlot_id', False)
         default.setdefault('move_history_ids', [])
         default.setdefault('move_history_ids2', [])
         return super(stock_move, self).copy_data(cr, uid, id, default, context=context)
