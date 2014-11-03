@@ -2433,7 +2433,10 @@ class stock_move(osv.osv):
         if todo:
             self.action_confirm(cr, uid, todo, context=context)
 
-        self.write(cr, uid, move_ids, {'state': 'done', 'date': time.strftime(DEFAULT_SERVER_DATETIME_FORMAT)}, context=context)
+        # Mark the move done, either now or at the datetime required by the context (ie. inventory being done)
+        self.write(cr, uid, move_ids, {'state': 'done',
+                'date': context.get('force_date', time.strftime(DEFAULT_SERVER_DATETIME_FORMAT))},
+                context=context)
         for id in move_ids:
              wf_service.trg_trigger(uid, 'stock.move', id, cr)
 
@@ -2838,8 +2841,11 @@ class stock_inventory(osv.osv):
         """
         if context is None:
             context = {}
+        else:
+            context = context.copy()
         move_obj = self.pool.get('stock.move')
         for inv in self.browse(cr, uid, ids, context=context):
+            context['force_date'] = inv.date
             move_obj.action_done(cr, uid, [x.id for x in inv.move_ids], context=context)
             self.write(cr, uid, [inv.id], {'state':'done', 'date_done': time.strftime('%Y-%m-%d %H:%M:%S')}, context=context)
         return True
@@ -2871,6 +2877,7 @@ class stock_inventory(osv.osv):
                         'product_uom': line.product_uom.id,
                         'prodlot_id': lot_id,
                         'date': inv.date,
+                        'date_expected': inv.date,
                     }
 
                     if change > 0:
