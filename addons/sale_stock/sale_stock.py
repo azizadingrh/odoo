@@ -309,10 +309,18 @@ class sale_order(osv.osv):
             'note': line.name,
         }
 
-    def _prepare_order_line_move(self, cr, uid, order, line, picking_id, date_planned, context=None):
+    def _prepare_order_line_move(self, *args):
+      """Hijacked API part, do not use !"""
+      raise osv.except_osv(
+              _('API changed!'),
+              _("_prepare_order_line_move() was removed from the model "
+                "'sale.order', the program must be changed and use "
+                "_prepare_order_line_moves()."))
+
+    def _prepare_order_line_moves(self, cr, uid, order, line, picking_id, date_planned, context=None):
         location_id = order.shop_id.warehouse_id.lot_stock_id.id
         output_id = order.shop_id.warehouse_id.lot_output_id.id
-        return {
+        return [{
             'name': line.name,
             'picking_id': picking_id,
             'product_id': line.product_id.id,
@@ -333,7 +341,7 @@ class sale_order(osv.osv):
             #'state': 'waiting',
             'company_id': order.company_id.id,
             'price_unit': line.product_id.standard_price or 0.0
-        }
+        }]
 
     def _prepare_order_picking(self, cr, uid, order, context=None):
         pick_name = self.pool.get('ir.sequence').get(cr, uid, 'stock.picking.out')
@@ -421,7 +429,10 @@ class sale_order(osv.osv):
                 if line.product_id.type in ('product', 'consu'):
                     if not picking_id:
                         picking_id = picking_obj.create(cr, uid, self._prepare_order_picking(cr, uid, order, context=context))
-                    move_id = move_obj.create(cr, uid, self._prepare_order_line_move(cr, uid, order, line, picking_id, date_planned, context=context))
+                    for move_data in self._prepare_order_line_moves(
+                            cr, uid, order, line, picking_id, date_planned, context=context):
+                        # We will retain only the last move's id
+                        move_id = move_obj.create(cr, uid, move_data)
                 else:
                     # a service has no stock move
                     move_id = False
