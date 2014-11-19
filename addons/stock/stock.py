@@ -2859,20 +2859,35 @@ class stock_inventory(osv.osv):
         product_context = dict(context, compute_child=False)
 
         location_obj = self.pool.get('stock.location')
+        uom_obj = self.pool.get('product.uom')
         for inv in self.browse(cr, uid, ids, context=context):
             move_ids = []
+            inv_qty = {}
+            for line in inv.inventory_line_id:
+                key = (line.product_id.id,line.prod_lot_id.id)
+                product_qty = uom_obj._compute_qty_obj(cr, uid, line.product_uom, line.product_qty, line.product_id.uom_id, context=context)
+                inv_qty[key] = inv_qty.get(key,0) + product_qty
+
             for line in inv.inventory_line_id:
                 pid = line.product_id.id
-                product_context.update(uom=line.product_uom.id, to_date=inv.date, date=inv.date, prodlot_id=line.prod_lot_id.id)
-                amount = location_obj._product_get(cr, uid, line.location_id.id, [pid], product_context)[pid]
-                change = line.product_qty - amount
                 lot_id = line.prod_lot_id.id
+                product_qty = inv_qty.get((pid,lot_id),-1)
+
+                if product_qty==-1:
+                    continue
+                del inv_qty[(pid,lot_id)]
+
+                uom_id = line.product_id.uom_id.id
+                product_context.update(uom=uom_id, to_date=inv.date, date=inv.date, prodlot_id=lot_id)
+                amount = location_obj._product_get(cr, uid, line.location_id.id, [pid], product_context)[pid]
+
+                change = product_qty - amount
                 if change:
                     location_id = line.product_id.property_stock_inventory.id
                     value = {
                         'name': _('INV:') + (line.inventory_id.name or ''),
                         'product_id': line.product_id.id,
-                        'product_uom': line.product_uom.id,
+                        'product_uom': uom_id,
                         'prodlot_id': lot_id,
                         'date': inv.date,
                     }
