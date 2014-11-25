@@ -532,8 +532,8 @@ class account_invoice(osv.osv):
                 acc_id = p.property_account_payable.id
                 partner_payment_term = p.property_supplier_payment_term and p.property_supplier_payment_term.id or False
             fiscal_position = p.property_account_position and p.property_account_position.id or False
-            if p.bank_ids:
-                bank_id = p.bank_ids[0].id
+            if p.commercial_partner_id.bank_ids:
+                bank_id = p.commercial_partner_id.bank_ids[0].id
 
         result = {'value': {
             'account_id': acc_id,
@@ -831,7 +831,7 @@ class account_invoice(osv.osv):
             for tax in inv.tax_line:
                 if tax.manual:
                     continue
-                key = (tax.tax_code_id.id, tax.base_code_id.id, tax.account_id.id, tax.account_analytic_id.id)
+                key = (tax.tax_code_id.id, tax.base_code_id.id, tax.account_id.id)
                 tax_key.append(key)
                 if not key in compute_taxes:
                     raise osv.except_osv(_('Warning!'), _('Global taxes defined, but they are not in invoice lines !'))
@@ -1033,7 +1033,7 @@ class account_invoice(osv.osv):
             line = self.finalize_invoice_move_lines(cr, uid, inv, line)
 
             move = {
-                'ref': inv.reference and inv.reference or inv.name,
+                'ref': inv.reference or inv.supplier_invoice_number or inv.name,
                 'line_id': line,
                 'journal_id': journal_id,
                 'date': inv.date_invoice,
@@ -1121,6 +1121,23 @@ class account_invoice(osv.osv):
                         'AND account_analytic_line.move_id = account_move_line.id',
                         (ref, move_id))
         return True
+
+    def action_proforma(self, cr, uid, ids, context=None):
+        """
+        Check if all taxes are present with the correct base amount
+        on creating a proforma invoice. This leaves room for manual
+        corrections of the tax amount.
+        """
+        if not ids:
+            return True
+        if isinstance(ids, (int, long)):
+            ids = [ids]
+        ait_obj = self.pool.get('account.invoice.tax')
+        for inv in self.browse(cr, uid, ids, context=context):
+            compute_taxes = ait_obj.compute(cr, uid, inv.id, context=context)
+            self.check_tax_lines(cr, uid, inv, compute_taxes, ait_obj)
+        return self.write(
+            cr, uid, ids, {'state': 'proforma2'}, context=context)
 
     def action_cancel(self, cr, uid, ids, context=None):
         if context is None:
@@ -1665,7 +1682,7 @@ class account_invoice_tax(osv.osv):
         'invoice_id': fields.many2one('account.invoice', 'Invoice Line', ondelete='cascade', select=True),
         'name': fields.char('Tax Description', size=64, required=True),
         'account_id': fields.many2one('account.account', 'Tax Account', required=True, domain=[('type','<>','view'),('type','<>','income'), ('type', '<>', 'closed')]),
-        'account_analytic_id': fields.many2one('account.analytic.account', 'Analytic account'),
+        'account_analytic_id': fields.many2one('account.analytic.account', 'Analytic account', readonly=True),
         'base': fields.float('Base', digits_compute=dp.get_precision('Account')),
         'amount': fields.float('Amount', digits_compute=dp.get_precision('Account')),
         'manual': fields.boolean('Manual'),
@@ -1743,7 +1760,15 @@ class account_invoice_tax(osv.osv):
                     val['account_id'] = tax['account_paid_id'] or line.account_id.id
                     val['account_analytic_id'] = tax['account_analytic_paid_id']
 
-                key = (val['tax_code_id'], val['base_code_id'], val['account_id'], val['account_analytic_id'])
+                # If the taxes generate moves on the same financial account as the invoice line
+                # and no default analytic account is defined at the tax level, propagate the
+                # analytic account from the invoice line to the tax line. This is necessary
+                # in situations were (part of) the taxes cannot be reclaimed,
+                # to ensure the tax move is allocated to the proper analytic account.
+                if not val.get('account_analytic_id') and line.account_analytic_id and val['account_id'] == line.account_id.id:
+                    val['account_analytic_id'] = line.account_analytic_id.id
+
+                key = (val['tax_code_id'], val['base_code_id'], val['account_id'])
                 if not key in tax_grouped:
                     tax_grouped[key] = val
                 else:

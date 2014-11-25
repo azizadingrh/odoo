@@ -2277,6 +2277,7 @@ class BaseModel(object):
                 view = getattr(self, '_get_default_%s_view' % view_type)(
                     cr, user, context)
             except AttributeError:
+                if config['debug_mode']: raise
                 # what happens here, graph case?
                 raise except_orm(_('Invalid Architecture!'), _("There is no view of type '%s' defined for the structure!") % view_type)
 
@@ -3307,7 +3308,8 @@ class BaseModel(object):
 
         cr.commit()     # start a new transaction
 
-        self._add_sql_constraints(cr)
+        if getattr(self, '_auto', True):
+            self._add_sql_constraints(cr)
 
         if create:
             self._execute_sql(cr)
