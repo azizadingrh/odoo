@@ -88,7 +88,10 @@ def base_calendar_id2real_id(base_calendar_id=None, with_date=False):
                 return (int(real_id), real_date, end.strftime("%Y-%m-%d %H:%M:%S"))
             return int(real_id)
 
-    return base_calendar_id and int(base_calendar_id) or base_calendar_id
+        return int(base_calendar_id)
+
+    return base_calendar_id
+    
 
 def get_real_ids(ids):
     if isinstance(ids, (str, int, long)):
@@ -1134,7 +1137,11 @@ rule or repeating pattern of time to exclude from the recurring rule."),
                     'email': partner.email
                 }, context=local_context)
                 if partner.email:
-                    mail_to = mail_to + " " + partner.email
+                    mail_to = (
+                        mail_to + ";" + partner.email
+                        if mail_to
+                        else partner.email
+                    )
                 self.write(cr, uid, [event.id], {
                     'attendee_ids': [(4, att_id)]
                 }, context=context)
