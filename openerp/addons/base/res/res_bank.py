@@ -62,7 +62,7 @@ class res_partner_bank_type(osv.osv):
         'name': fields.char('Name', size=64, required=True, translate=True),
         'code': fields.char('Code', size=64, required=True),
         'field_ids': fields.one2many('res.partner.bank.type.field', 'bank_type_id', 'Type Fields'),
-        'format_layout': fields.text('Format Layout', translate=True)
+        'format_layout': fields.text('Format Layout', translate=False)
     }
     _defaults = {
         'format_layout': lambda *args: "%(bank_name)s: %(acc_number)s"
@@ -139,6 +139,7 @@ class res_partner_bank(osv.osv):
         'state': fields.selection(_bank_type_get, 'Bank Account Type', required=True,
             change_default=True),
         'sequence': fields.integer('Sequence'),
+        'active': fields.boolean('Active', select=True),
         'footer': fields.boolean("Display on Reports", help="Display this bank account on the footer of printed documents like invoices and sales orders.")
     }
 
@@ -155,7 +156,8 @@ class res_partner_bank(osv.osv):
             cursor, user, 'country_id', context=context),
         'state_id': lambda obj, cursor, user, context: obj._default_value(
             cursor, user, 'state_id', context=context),
-        'name': '/'
+        'name': '/',
+        'active': True,
     }
 
     def fields_get(self, cr, uid, allfields=None, context=None):
@@ -190,6 +192,7 @@ class res_partner_bank(osv.osv):
                 try:
                     if not data.get('bank_name'):
                         data['bank_name'] = _('BANK')
+                    data = dict((k, v or '') for (k, v) in data.iteritems())
                     name = bank_code_format[data['state']] % data
                 except Exception:
                     raise osv.except_osv(_("Formating Error"), _("Invalid Bank Account Type Name format."))

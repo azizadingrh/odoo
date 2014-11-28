@@ -120,7 +120,9 @@ class project_work(osv.osv):
         vals_line['user_id'] = vals['user_id']
         vals_line['product_id'] = result['product_id']
         if vals.get('date'):
-            vals_line['date' ] = vals['date'][:10]
+            timestamp = datetime.datetime.strptime(vals['date'], tools.DEFAULT_SERVER_DATETIME_FORMAT)
+            ts = fields.datetime.context_timestamp(cr, uid, timestamp, context)
+            vals_line['date'] = ts.strftime(tools.DEFAULT_SERVER_DATE_FORMAT)
 
         # Calculate quantity based on employee's product's uom
         vals_line['unit_amount'] = vals['hours']
@@ -274,7 +276,7 @@ class task(osv.osv):
                         if vals.get('project_id',False):
                             vals_line['account_id'] = acc_id
                         if vals.get('name',False):
-                            vals_line['name'] = '%s: %s' % (tools.ustr(vals['name']), tools.ustr(task_work.name) or '/')
+                            vals_line['name'] = '%s: %s' % (tools.ustr(vals['name']), tools.ustr(task_work.name or '/'))
                         hr_anlytic_timesheet.write(cr, uid, [line_id], vals_line, {})
 
         res = super(task,self).write(cr, uid, ids, vals, context)
