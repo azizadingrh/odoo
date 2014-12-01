@@ -354,7 +354,7 @@ class db(netsvc.ExportService):
         if not tools.config['list_db'] and not document:
             raise openerp.exceptions.AccessDenied()
         chosen_template = tools.config['db_template']
-        templates_list = tuple(set(['template0', 'template1', 'postgres', chosen_template]))
+        templates_list = tuple(set(['postgres', chosen_template]))
         db = sql_db.db_connect('postgres')
         cr = db.cursor()
         try:
@@ -368,9 +368,9 @@ class db(netsvc.ExportService):
                     res = cr.fetchone()
                     db_user = res and str(res[0])
                 if db_user:
-                    cr.execute("select datname from pg_database where datdba=(select usesysid from pg_user where usename=%s) and datname not in %s order by datname", (db_user, templates_list))
+                    cr.execute("select datname from pg_database where datdba=(select usesysid from pg_user where usename=%s) and not datistemplate and datallowconn and datname not in %s order by datname", (db_user, templates_list))
                 else:
-                    cr.execute("select datname from pg_database where datname not in %s order by datname", (templates_list,))
+                    cr.execute("select datname from pg_database where not datistemplate and datallowconn and datname not in %s order by datname", (templates_list,))
                 res = [tools.ustr(name) for (name,) in cr.fetchall()]
             except Exception:
                 res = []
