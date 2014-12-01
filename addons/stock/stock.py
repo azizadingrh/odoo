@@ -1638,9 +1638,11 @@ class stock_move(osv.osv):
                    (move.product_id.track_production and move.location_id.usage == 'production') or \
                    (move.product_id.track_production and move.location_dest_id.usage == 'production') or \
                    (move.product_id.track_incoming and move.location_id.usage == 'supplier') or \
-                   (move.product_id.track_outgoing and move.location_dest_id.usage == 'customer') or \
-                   (move.product_id.track_incoming and move.location_id.usage == 'inventory') \
-               )):
+                   (move.product_id.track_outgoing and move.location_dest_id.usage == 'customer')
+               ) and
+               # We still let users correct wrong moves with inventories
+               move.location_id.usage != 'inventory' and \
+               move.location_dest_id.usage != 'inventory'):
                 return False
         return True
 
@@ -1850,7 +1852,8 @@ class stock_move(osv.osv):
             default = {}
         default = default.copy()
         default.setdefault('tracking_id', False)
-        default.setdefault('prodlot_id', False)
+        if not context.get('keep_prodlot', False):
+            default.setdefault('prodlot_id', False)
         default.setdefault('move_history_ids', [])
         default.setdefault('move_history_ids2', [])
         return super(stock_move, self).copy_data(cr, uid, id, default, context=context)
@@ -2124,10 +2127,7 @@ class stock_move(osv.osv):
                 ptype = todo[0][1][5] and todo[0][1][5] or location_obj.picking_type_get(cr, uid, todo[0][0].location_dest_id, todo[0][1][0])
                 if picking:
                     # name of new picking according to its type
-                    if ptype == 'internal':
-                        new_pick_name = seq_obj.get(cr, uid,'stock.picking')
-                    else :
-                        new_pick_name = seq_obj.get(cr, uid, 'stock.picking.' + ptype)
+                    new_pick_name = seq_obj.get(cr, uid, 'stock.picking.' + ptype)
                     pickid = self._create_chained_picking(cr, uid, new_pick_name, picking, ptype, todo, context=context)
                     # Need to check name of old picking because it always considers picking as "OUT" when created from Sales Order
                     old_ptype = location_obj.picking_type_get(cr, uid, picking.move_lines[0].location_id, picking.move_lines[0].location_dest_id)
@@ -2479,7 +2479,7 @@ class stock_move(osv.osv):
                 self.action_confirm(cr, uid, [move.id], context=context)
             self.write(cr, uid, [move.id], 
                        {'state': 'done', 
-                       'date': time.strftime(DEFAULT_SERVER_DATETIME_FORMAT)}, 
+                       'date': context.get('force_date', time.strftime(DEFAULT_SERVER_DATETIME_FORMAT))},
                        context=context)
         for pick_id in picking_ids:
             wf_service.trg_write(uid, 'stock.picking', pick_id, cr)
@@ -2884,8 +2884,11 @@ class stock_inventory(osv.osv):
         """
         if context is None:
             context = {}
+        else:
+            context = context.copy()
         move_obj = self.pool.get('stock.move')
         for inv in self.browse(cr, uid, ids, context=context):
+            context['force_date'] = inv.date
             move_obj.action_done(cr, uid, [x.id for x in inv.move_ids], context=context)
             self.write(cr, uid, [inv.id], {'state':'done', 'date_done': time.strftime('%Y-%m-%d %H:%M:%S')}, context=context)
         return True
@@ -2900,23 +2903,41 @@ class stock_inventory(osv.osv):
         # location, never recursively, so we use a special context
         product_context = dict(context, compute_child=False)
 
+        uom_obj = self.pool['product.uom']
         location_obj = self.pool.get('stock.location')
+        uom_obj = self.pool.get('product.uom')
         for inv in self.browse(cr, uid, ids, context=context):
             move_ids = []
+            inv_qty = {}
+            for line in inv.inventory_line_id:
+                key = (line.product_id.id,line.prod_lot_id.id)
+                product_qty = uom_obj._compute_qty_obj(cr, uid, line.product_uom, line.product_qty, line.product_id.uom_id, context=context)
+                inv_qty[key] = inv_qty.get(key,0) + product_qty
+
             for line in inv.inventory_line_id:
                 pid = line.product_id.id
-                product_context.update(uom=line.product_uom.id, to_date=inv.date, date=inv.date, prodlot_id=line.prod_lot_id.id)
-                amount = location_obj._product_get(cr, uid, line.location_id.id, [pid], product_context)[pid]
-                change = line.product_qty - amount
                 lot_id = line.prod_lot_id.id
+                product_qty = inv_qty.get((pid,lot_id),-1)
+
+                if product_qty==-1:
+                    continue
+                del inv_qty[(pid,lot_id)]
+
+                uom_id = line.product_id.uom_id.id
+                product_context.update(uom=uom_id, to_date=inv.date, date=inv.date, prodlot_id=lot_id)
+                amount = location_obj._product_get(cr, uid, line.location_id.id, [pid], product_context)[pid]
+                change = product_qty - amount
+                if abs(change) < uom_obj.browse(cr, uid, uom_id).rounding:
+                    continue
                 if change:
                     location_id = line.product_id.property_stock_inventory.id
                     value = {
                         'name': _('INV:') + (line.inventory_id.name or ''),
                         'product_id': line.product_id.id,
-                        'product_uom': line.product_uom.id,
+                        'product_uom': uom_id,
                         'prodlot_id': lot_id,
                         'date': inv.date,
+                        'date_expected': inv.date,
                     }
 
                     if change > 0:
