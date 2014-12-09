@@ -1673,6 +1673,11 @@ class stock_move(osv.osv):
                 return False
         return True
 
+    def _message_check_product_lot(self, cr, uid, ids, context=None):
+        for move in self.browse(cr, uid, ids, context=context):
+            if move.prodlot_id and move.state == 'done' and (move.prodlot_id.product_id.id != move.product_id.id):
+                return _('You try to assign a lot [ %s ] which is not from the same product [ %s ].' % (move.prodlot_id.name, move.product_id.name))
+
     _columns = {
         'name': fields.char('Description', required=True, select=True),
         'priority': fields.selection([('0', 'Not urgent'), ('1', 'Urgent')], 'Priority'),
@@ -1748,7 +1753,7 @@ class stock_move(osv.osv):
         (_check_location, 'You cannot move products from or to a location of the type view.',
             ['location_id','location_dest_id']),
         (_check_product_lot,
-            'You try to assign a lot which is not from the same product.',
+            _message_check_product_lot,
             ['prodlot_id'])]
 
     def _default_location_destination(self, cr, uid, context=None):

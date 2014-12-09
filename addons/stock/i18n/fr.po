@@ -2391,8 +2391,8 @@ msgstr ""
 
 #. module: stock
 #: constraint:stock.move:0
-msgid "You try to assign a lot which is not from the same product."
-msgstr "Vous tentez d'assigner un lot qui n'appartient pas au même article."
+msgid "You try to assign a lot [ %s ] which is not from the same product [ %s ]."
+msgstr "Vous tentez d'assigner un lot [ %s ] qui n'appartient pas au même article [ %s ]."
 
 #. module: stock
 #: field:report.stock.move,day_diff1:0
