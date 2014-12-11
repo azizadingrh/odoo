@@ -2921,25 +2921,25 @@ class stock_inventory(osv.osv):
         # location, never recursively, so we use a special context
         product_context = dict(context, compute_child=False)
 
-        uom_obj = self.pool['product.uom']
         location_obj = self.pool.get('stock.location')
         uom_obj = self.pool.get('product.uom')
         for inv in self.browse(cr, uid, ids, context=context):
             move_ids = []
             inv_qty = {}
             for line in inv.inventory_line_id:
-                key = (line.product_id.id,line.prod_lot_id.id)
+                key = (line.product_id.id, line.prod_lot_id.id, line.location_id.id)
                 product_qty = uom_obj._compute_qty_obj(cr, uid, line.product_uom, line.product_qty, line.product_id.uom_id, context=context)
-                inv_qty[key] = inv_qty.get(key,0) + product_qty
+                inv_qty[key] = inv_qty.get(key, 0) + product_qty
 
             for line in inv.inventory_line_id:
                 pid = line.product_id.id
                 lot_id = line.prod_lot_id.id
-                product_qty = inv_qty.get((pid,lot_id),-1)
+                loc_id = line.location_id.id
+                product_qty = inv_qty.get((pid, lot_id, loc_id), -1)
 
-                if product_qty==-1:
+                if product_qty == -1:
                     continue
-                del inv_qty[(pid,lot_id)]
+                del inv_qty[(pid, lot_id, loc_id)]
 
                 uom_id = line.product_id.uom_id.id
                 product_context.update(uom=uom_id, to_date=inv.date, date=inv.date, prodlot_id=lot_id)
