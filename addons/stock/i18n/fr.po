@@ -147,7 +147,7 @@ msgid ""
 "Internal reference number in case it differs from the manufacturer's serial "
 "number"
 msgstr ""
-"Référence interne, dans le cas où celle-ci est différente du lot du "
+"Référence production, dans le cas où celle-ci est différente du lot du "
 "fabricant."
 
 #. module: stock
@@ -1234,7 +1234,7 @@ msgstr ""
 msgid ""
 "The combination of Serial Number, internal reference, Product and Company "
 "must be unique !"
-msgstr "La combinaison de lot, référence interne, article et société doit être unique !"
+msgstr "La combinaison de lot, référence production, article et société doit être unique !"
 
 #. module: stock
 #: code:addons/stock/wizard/stock_return_picking.py:109
@@ -2443,7 +2443,7 @@ msgstr "Qté reçue"
 #. module: stock
 #: field:stock.production.lot,ref:0
 msgid "Internal Reference"
-msgstr "Référence interne"
+msgstr "Référence production"
 
 #. module: stock
 #: help:stock.production.lot,prefix:0
