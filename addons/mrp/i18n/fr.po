@@ -2429,7 +2429,7 @@ msgstr "Productions"
 #: model:ir.model,name:mrp.model_stock_move_split
 #: view:mrp.production:0
 msgid "Split in Serial Numbers"
-msgstr "Diviser en numéros de série"
+msgstr "Diviser en lots"
 
 #. module: mrp
 #: help:mrp.bom,product_uos:0
