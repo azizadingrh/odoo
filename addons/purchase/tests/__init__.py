@@ -20,7 +20,9 @@
 ##############################################################################
 
 import test_average_price
+import test_low_average_price
 
 checks = [
     test_average_price,
+    test_low_average_price,
 ]
