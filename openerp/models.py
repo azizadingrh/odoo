@@ -4564,6 +4564,7 @@ class BaseModel(object):
         """
         order_by_clause = ''
         order_spec = order_spec or self._order
+        has_id = False
         if order_spec:
             order_by_elements = []
             self._check_qorder(order_spec)
@@ -4575,6 +4576,7 @@ class BaseModel(object):
                 inner_clause = None
                 if order_field == 'id':
                     order_by_elements.append('"%s"."%s" %s' % (self._table, order_field, order_direction))
+                    has_id = True
                 elif order_field in self._columns:
                     order_column = self._columns[order_field]
                     if order_column._classic_read:
@@ -4602,8 +4604,10 @@ class BaseModel(object):
                             order_by_elements.append("%s %s" % (clause, order_direction))
                     else:
                         order_by_elements.append("%s %s" % (inner_clause, order_direction))
-            if order_by_elements:
-                order_by_clause = ",".join(order_by_elements)
+            # Order by id as a last resort to respect order of entry
+            if not has_id:
+                order_by_elements.append('"%s"."%s"' % (self._table, 'id'))
+            order_by_clause = ",".join(order_by_elements)
 
         return order_by_clause and (' ORDER BY %s ' % order_by_clause) or ''
 
