@@ -63,7 +63,7 @@ msgid ""
 "                customer or not.\n"
 "              </p>\n"
 "            "
-msgstr "<p class=\"oe_view_nocontent_create\">\n                Cliquez pour créer un ordre de réparation. \n              </p><p>\n                Dans un ordre de réparation, vous pouvez spécifier les composants à enlever,\n                ajouter ou remplacer et enregistrer le temps que vous avez passé sur les différentes \n                opérations.\n              </p><p>\n                L'ordre de réparation utilise la date de garantie sur le numéro de série\n                afin de déterminer si la réparation devrait être facturée au client ou pas.\n              </p>\n            "
+msgstr "<p class=\"oe_view_nocontent_create\">\n                Cliquez pour créer un ordre de réparation. \n              </p><p>\n                Dans un ordre de réparation, vous pouvez spécifier les composants à enlever,\n                ajouter ou remplacer et enregistrer le temps que vous avez passé sur les différentes \n                opérations.\n              </p><p>\n                L'ordre de réparation utilise la date de garantie du lot\n                afin de déterminer si la réparation devrait être facturée au client ou pas.\n              </p>\n            "
 
 #. module: mrp_repair
 #: code:addons/mrp_repair/wizard/cancel_repair.py:41
@@ -693,7 +693,7 @@ msgstr "Sélectionner \"Avant la réparation\" ou \"Après la réparation\" vous
 #: code:addons/mrp_repair/mrp_repair.py:289
 #, python-format
 msgid "Serial number is required for operation line with product '%s'"
-msgstr "Le numéro de série est obligatoire pour les opérations sur l'article \"%s\""
+msgstr "Le lot est obligatoire pour les opérations sur l'article \"%s\""
 
 #. module: mrp_repair
 #: view:mrp.repair:mrp_repair.view_repair_order_form
