@@ -1878,7 +1878,7 @@ msgstr "Mouvements internes"
 #. module: stock
 #: field:stock.production.lot,ref:0
 msgid "Internal Reference"
-msgstr "Référence interne"
+msgstr "Référence production"
 
 #. module: stock
 #: code:addons/stock/stock.py:3282
@@ -1902,7 +1902,7 @@ msgstr "Type interne"
 msgid ""
 "Internal reference number in case it differs from the manufacturer's serial "
 "number"
-msgstr "Référence interne, dans le cas où celle-ci est différente du lot du fabricant."
+msgstr "Référence production, dans le cas où celle-ci est différente du lot du fabricant."
 
 #. module: stock
 #: field:stock.inventory,location_id:0
@@ -4598,7 +4598,7 @@ msgstr "Le code de l'entrepôt doit être unique par société !"
 msgid ""
 "The combination of serial number, internal reference and product must be "
 "unique !"
-msgstr "La combinaison de lot, référence interne et article doit être unique !"
+msgstr "La combinaison de lot, référence production et article doit être unique !"
 
 #. module: stock
 #: help:stock.quant,company_id:0
