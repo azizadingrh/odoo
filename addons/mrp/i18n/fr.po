@@ -575,7 +575,7 @@ msgstr "Utilisés pour"
 #: code:addons/mrp/report/price.py:141
 #, python-format
 msgid "Cost Price per Unit of Measure"
-msgstr "Prix de revient par unité de mesure"
+msgstr "Prix de valorisation par unité de mesure"
 
 #. module: mrp
 #: code:addons/mrp/report/price.py:148

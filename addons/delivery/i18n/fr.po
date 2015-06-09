@@ -138,7 +138,7 @@ msgstr "Condition"
 #. module: delivery
 #: field:delivery.grid.line,standard_price:0
 msgid "Cost Price"
-msgstr "Prix de revient"
+msgstr "Prix de valorisation"
 
 #. module: delivery
 #: view:delivery.grid:delivery.view_delivery_grid_form

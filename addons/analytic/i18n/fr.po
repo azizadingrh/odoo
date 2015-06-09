@@ -82,7 +82,7 @@ msgstr "Solde"
 msgid ""
 "Calculated by multiplying the quantity and the price given in the Product's "
 "cost price. Always expressed in the company main currency."
-msgstr "Calculé en multipliant la quantité par le prix de revient de l'article. Toujours exprimé dans la devise principale de la société."
+msgstr "Calculé en multipliant la quantité par le prix de valorisation de l'article. Toujours exprimé dans la devise principale de la société."
 
 #. module: analytic
 #: selection:account.analytic.account,state:0
