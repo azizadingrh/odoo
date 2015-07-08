@@ -232,7 +232,7 @@ msgid ""
 "                customers.\n"
 "              </p>\n"
 "            "
-msgstr "<p class=\"oe_view_nocontent_create\">\n                Cliquez pour ajouter un numéro de série.\n              </p><p>\n                Ceci est la liste de tous les lots de production que vous avez enregistrés. Lorsque\n                vous sélectionnez un lot, vous pouvez obtenir la traçabilité de tous les articles\n                contenus dans le lot. Par défaut, la liste est filtrée sur les numéros de série disponibles\n                dans votre entrepôt, mais vous pouvez décocher le bouton 'Disponible' pour avoir\n                tous les lots que vous avez produits, reçus ou livrés à vos clients.\n              </p>\n            "
+msgstr "<p class=\"oe_view_nocontent_create\">\n                Cliquez pour ajouter un lot.\n              </p><p>\n                Ceci est la liste de tous les lots de production que vous avez enregistrés. Lorsque\n                vous sélectionnez un lot, vous pouvez obtenir la traçabilité de tous les articles\n                contenus dans le lot. Par défaut, la liste est filtrée sur les lots disponibles\n                dans votre entrepôt, mais vous pouvez décocher le bouton 'Disponible' pour avoir\n                tous les lots que vous avez produits, reçus ou livrés à vos clients.\n              </p>\n            "
 
 #. module: stock
 #: model:ir.actions.act_window,help:stock.action_picking_type_form
@@ -1394,7 +1394,7 @@ msgstr "Date prévue"
 #. module: stock
 #: field:stock.config.settings,module_product_expiry:0
 msgid "Expiry date on serial numbers"
-msgstr "Date de péremption sur les numéros de série"
+msgstr "Date de péremption sur les lots"
 
 #. module: stock
 #: code:addons/stock/stock.py:1322
@@ -1451,21 +1451,21 @@ msgstr "Forcer la stratégie d'enlèvement"
 msgid ""
 "Forces to specify a Serial Number for all moves containing this product and "
 "coming from a Supplier Location"
-msgstr "Force à préciser un numéro de série pour tous les mouvements contenant cet article et provenant d'un emplacement fournisseur"
+msgstr "Force à préciser un lot pour tous les mouvements contenant cet article et provenant d'un emplacement fournisseur"
 
 #. module: stock
 #: help:product.template,track_outgoing:0
 msgid ""
 "Forces to specify a Serial Number for all moves containing this product and "
 "going to a Customer Location"
-msgstr "Force à préciser un numéro de série pour tous les mouvements contenant cet article et à destination d'un emplacement client."
+msgstr "Force à préciser un lot pour tous les mouvements contenant cet article et à destination d'un emplacement client."
 
 #. module: stock
 #: help:product.template,track_all:0
 msgid ""
 "Forces to specify a Serial Number on each and every operation related to "
 "this product"
-msgstr "Force à spécifier un numéro de série sur toutes les opérations relatives à cet article"
+msgstr "Force à spécifier un lot sur toutes les opérations relatives à cet article"
 
 #. module: stock
 #: view:product.template:stock.product_template_search_form_view_stock
@@ -1878,7 +1878,7 @@ msgstr "Mouvements internes"
 #. module: stock
 #: field:stock.production.lot,ref:0
 msgid "Internal Reference"
-msgstr "Référence interne"
+msgstr "Référence production"
 
 #. module: stock
 #: code:addons/stock/stock.py:3282
@@ -1902,7 +1902,7 @@ msgstr "Type interne"
 msgid ""
 "Internal reference number in case it differs from the manufacturer's serial "
 "number"
-msgstr "Référence interne, dans le cas où celle-ci est différente du n° de série du fabricant."
+msgstr "Référence production, dans le cas où celle-ci est différente du lot du fabricant."
 
 #. module: stock
 #: field:stock.inventory,location_id:0
@@ -1912,7 +1912,7 @@ msgstr "Emplacement inventorié"
 #. module: stock
 #: field:stock.inventory,lot_id:0
 msgid "Inventoried Lot/Serial Number"
-msgstr "Lot/numéro de sérié inventorié"
+msgstr "Lot inventorié"
 
 #. module: stock
 #: field:stock.inventory,partner_id:0
@@ -2309,13 +2309,13 @@ msgstr "Inventaire par lot"
 #. module: stock
 #: model:ir.model,name:stock.model_stock_production_lot
 msgid "Lot/Serial"
-msgstr "Lot/N° série"
+msgstr "Lot"
 
 #. module: stock
 #: field:stock.pack.operation,lot_id:0
 #: field:stock.transfer_details_items,lot_id:0
 msgid "Lot/Serial Number"
-msgstr "Lot/numéro de série"
+msgstr "Lot"
 
 #. module: stock
 #: view:product.template:stock.view_template_property_form
@@ -2354,7 +2354,7 @@ msgstr "Gérer différents propriétaires de stock"
 #. module: stock
 #: model:res.groups,name:stock.group_production_lot
 msgid "Manage Lots / Serial Numbers"
-msgstr "Gérer les lots/numéros de série"
+msgstr "Gérer les lots"
 
 #. module: stock
 #: model:res.groups,name:stock.group_locations
@@ -2708,7 +2708,7 @@ msgstr "En stock"
 #: code:addons/stock/stock.py:2554
 #, python-format
 msgid "One Lot/Serial Number"
-msgstr "Un lot/numéro de série"
+msgstr "Un lot"
 
 #. module: stock
 #: code:addons/stock/stock.py:2551
@@ -4156,18 +4156,18 @@ msgstr "Séquence"
 #: view:stock.production.lot:stock.view_production_lot_tree
 #: field:stock.production.lot,name:0 field:stock.return.picking.line,lot_id:0
 msgid "Serial Number"
-msgstr "Numéro de série"
+msgstr "Lot"
 
 #. module: stock
 #: field:stock.inventory.line,prodlot_name:0
 msgid "Serial Number Name"
-msgstr "Nom du numéro de série"
+msgstr "Nom du lot"
 
 #. module: stock
 #: model:ir.actions.act_window,name:stock.action_production_lot_form
 #: model:ir.ui.menu,name:stock.menu_action_production_lot_form
 msgid "Serial Numbers"
-msgstr "Numéros de série"
+msgstr "Lots"
 
 #. module: stock
 #: field:procurement.rule,warehouse_id:0
@@ -4290,7 +4290,7 @@ msgstr "Colis source"
 msgid ""
 "Specify Lot/Serial Number to focus your inventory on a particular Lot/Serial"
 " Number."
-msgstr "Précisez un lot/numéro de série pour focaliser votre inventaire sur un lot/numéro particulier."
+msgstr "Précisez un lot pour focaliser votre inventaire sur un lot particulier."
 
 #. module: stock
 #: help:stock.inventory,partner_id:0
@@ -4598,7 +4598,7 @@ msgstr "Le code de l'entrepôt doit être unique par société !"
 msgid ""
 "The combination of serial number, internal reference and product must be "
 "unique !"
-msgstr "La combinaison de numéro de série, référence interne et article doit être unique !"
+msgstr "La combinaison de lot, référence production et article doit être unique !"
 
 #. module: stock
 #: help:stock.quant,company_id:0
@@ -4759,7 +4759,7 @@ msgid ""
 "This allows you to assign a lot (or serial number) to the pickings and "
 "moves.  This can make it possible to know which production lot was sent to a"
 " certain client, ..."
-msgstr "Permet d'assigner un numéro de lot (ou numéro de série) aux préparations et aux mouvements. Cela permet de savoir quel numéro de série a été envoyé à quel client, ..."
+msgstr "Permet d'assigner un numéro de lot aux préparations et aux mouvements. Cela permet de savoir quel numéro de série a été envoyé à quel client, ..."
 
 #. module: stock
 #: model:ir.actions.act_window,help:stock.quantsact
@@ -4933,12 +4933,12 @@ msgid ""
 "    - removal date\n"
 "    - alert date.\n"
 "This installs the module product_expiry."
-msgstr "Conserve différentes dates sur les articles et sur les numéros de série.\nLes dates suivantes sont suivies :\n    - date limite de consommation\n    - date limite d'utilisation optimale\n    - date d'enlèvement\n    - date d'alerte.\nCeci installe le module product_expiry."
+msgstr "Conserve différentes dates sur les articles et sur les lots.\nLes dates suivantes sont suivies :\n    - date limite de consommation\n    - date limite d'utilisation optimale\n    - date d'enlèvement\n    - date d'alerte.\nCeci installe le module product_expiry."
 
 #. module: stock
 #: field:stock.config.settings,group_stock_production_lot:0
 msgid "Track lots or serial numbers"
-msgstr "Garder trace des lots ou numéros de série"
+msgstr "Garder trace des lots"
 
 #. module: stock
 #: view:stock.picking:stock.view_picking_form
@@ -4996,7 +4996,7 @@ msgstr "Types d'opération"
 #. module: stock
 #: help:stock.production.lot,name:0
 msgid "Unique Serial Number"
-msgstr "Numéro de série unique"
+msgstr "Numéro de lot unique"
 
 #. module: stock
 #: field:stock.quant,cost:0
@@ -5109,7 +5109,7 @@ msgstr "Utilisez cet assistant pour faire une demande d'approvisionnement pour c
 #. module: stock
 #: help:stock.return.picking.line,lot_id:0
 msgid "Used to choose the lot/serial number of the product returned"
-msgstr "Permet de choisir le lot/numéro de série de l'article retourné"
+msgstr "Permet de choisir le lot de l'article retourné"
 
 #. module: stock
 #: help:stock.picking.type,sequence:0
@@ -5320,7 +5320,7 @@ msgstr "Quand le stock virtuel tombe en dessous de la quantité mini, Odoo gén�
 msgid ""
 "When you select a serial number (lot), the quantity is corrected with respect to\n"
 "                            the quantity of that serial number (lot) and not to the total quantity of the product."
-msgstr "Si vous sélectionnez un numéro de série (lot), la quantité est corrigée en fonction de la quantité de ce numéro de série (lot) et non de la quantité totale de l'article."
+msgstr "Si vous sélectionnez un lot, la quantité est corrigée en fonction de la quantité de ce lot et non de la quantité totale de l'article."
 
 #. module: stock
 #: field:stock.return.picking.line,wizard_id:0
@@ -5419,7 +5419,7 @@ msgstr "On ne faire de retours que pour les préparations terminées !"
 #: code:addons/stock/stock.py:2159
 #, python-format
 msgid "You must assign a serial number for the product %s"
-msgstr "Vous devez affecter un numéro de série pour l'article %s"
+msgstr "Vous devez affecter un lot pour l'article %s"
 
 #. module: stock
 #: constraint:stock.move:0

@@ -380,7 +380,7 @@ msgstr ""
 #. module: purchase
 #: help:purchase.config.settings,group_costing_method:0
 msgid "Allows you to compute product cost price based on average cost."
-msgstr "Permet de calculer le prix de revient de l'article en fonction du prix moyen."
+msgstr "Permet de calculer le prix de valorisation de l'article en fonction du prix moyen."
 
 #. module: purchase
 #: help:purchase.config.settings,group_uom:0

@@ -9972,7 +9972,7 @@ msgstr "Ce compte remplacera le compte de tiers par défaut pour ce client."
 #: help:product.category,property_account_expense_categ:0
 #: help:product.template,property_account_expense:0
 msgid "This account will be used to value outgoing stock using cost price."
-msgstr "Ce compte sera utilisé pour valoriser le stock sortant sur base du prix de revient."
+msgstr "Ce compte sera utilisé pour valoriser le stock sortant sur base du prix de valorisation."
 
 #. module: account
 #: help:product.category,property_account_income_categ:0

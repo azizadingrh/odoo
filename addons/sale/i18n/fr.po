@@ -1879,7 +1879,7 @@ msgid ""
 "This adds the 'Margin' on sales order.\n"
 "This gives the profitability by calculating the difference between the Unit Price and Cost Price.\n"
 "-This installs the module sale_margin."
-msgstr "Ajoute la 'Marge' sur les commandes.\nCalcule la profitabilité par différence entre le prix facturé et le prix de revient.\nInstalle le module Marge de ventes [sale_margin]."
+msgstr "Ajoute la 'Marge' sur les commandes.\nCalcule la profitabilité par différence entre le prix facturé et le prix de valorisation.\nInstalle le module Marge de ventes [sale_margin]."
 
 #. module: sale
 #: help:sale.config.settings,module_website_quote:0

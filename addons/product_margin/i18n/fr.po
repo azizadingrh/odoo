@@ -237,7 +237,7 @@ msgstr "Prix Standard"
 #. module: product_margin
 #: help:product.product,normal_cost:0
 msgid "Sum of Multiplication of Cost price and quantity of Supplier Invoices"
-msgstr "Somme de la multiplication du prix de revient par la quantité dans les factures fournisseurs"
+msgstr "Somme de la multiplication du prix de valorisation par la quantité dans les factures fournisseurs"
 
 #. module: product_margin
 #: help:product.product,turnover:0

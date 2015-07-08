@@ -211,7 +211,7 @@ class stock_location_route(osv.osv):
     _order = 'sequence'
 
     _columns = {
-        'name': fields.char('Route Name', required=True),
+        'name': fields.char('Route Name', required=True, translate=True),
         'sequence': fields.integer('Sequence'),
         'pull_ids': fields.one2many('procurement.rule', 'route_id', 'Pull Rules', copy=True),
         'active': fields.boolean('Active', help="If the active field is set to False, it will allow you to hide the route without removing it."),
@@ -320,6 +320,12 @@ class stock_quant(osv.osv):
     _defaults = {
         'company_id': lambda self, cr, uid, c: self.pool.get('res.company')._company_default_get(cr, uid, 'stock.quant', context=c),
     }
+
+    _sql_constraints = [
+        ('product_match_lot',
+         'FOREIGN KEY(lot_id, product_id) REFERENCES stock_production_lot(id,product_id)',
+         'The Product of the Serial Number/Lot does not match.'),
+    ]
 
     def init(self, cr):
         cr.execute('SELECT indexname FROM pg_indexes WHERE indexname = %s', ('stock_quant_product_location_index',))
@@ -1583,6 +1589,11 @@ class stock_production_lot(osv.osv):
     }
     _sql_constraints = [
         ('name_ref_uniq', 'unique (name, ref, product_id)', 'The combination of serial number, internal reference and product must be unique !'),
+        # A dummy constraint, always respected since id is the primary key,
+        # but which lets us define foreign keys on other objects to enforce a
+        # match between products and lots using Postgres foreign keys on the
+        # other models.
+        ('id_prod_uniq', 'unique (id, product_id)', 'The combination of database id and product must be unique !'),
     ]
 
     def action_traceability(self, cr, uid, ids, context=None):
