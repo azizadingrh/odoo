@@ -122,7 +122,7 @@ msgstr "Société"
 #: view:product.template:stock_account.view_template_property_form
 #: view:stock.change.standard.price:stock_account.view_change_standard_price
 msgid "Cost Price"
-msgstr "Prix de revient"
+msgstr "Prix de valorisation"
 
 #. module: stock_account
 #: field:product.template,cost_method:0
@@ -233,7 +233,7 @@ msgstr "ID"
 msgid ""
 "If cost price is increased, stock variation account will be debited and stock output account will be credited with the value = (difference of amount * quantity available).\n"
 "If cost price is decreased, stock variation account will be creadited and stock input account will be debited."
-msgstr "Si le prix de revient augmente, la variation comptable du stock sera débitrice et le compte de sortie de stock sera crédité avec la valeur = (différence du montant * quantité disponible).\nSi le prix de revient diminue, la variation comptable du stock sera créditrice et le compte d'entrée en stock sera débiteur."
+msgstr "Si le prix de valorisation augmente, la variation comptable du stock sera débitrice et le compte de sortie de stock sera crédité avec la valeur = (différence du montant * quantité disponible).\nSi le prix de valorisation diminue, la variation comptable du stock sera créditrice et le compte d'entrée en stock sera débiteur."
 
 #. module: stock_account
 #: help:product.template,valuation:0

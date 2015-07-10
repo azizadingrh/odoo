@@ -21,14 +21,14 @@ msgstr ""
 #. module: sale_margin
 #: field:sale.order.line,purchase_price:0
 msgid "Cost Price"
-msgstr "Prix de revient"
+msgstr "Prix de valorisation"
 
 #. module: sale_margin
 #: help:sale.order,margin:0
 msgid ""
 "It gives profitability by calculating the difference between the Unit Price "
 "and the cost price."
-msgstr "Il donne la rentabilité en calculant la différence entre le prix unitaire et le prix de revient."
+msgstr "Il donne la rentabilité en calculant la différence entre le prix unitaire et le prix de valorisation."
 
 #. module: sale_margin
 #: field:sale.order,margin:0 field:sale.order.line,margin:0

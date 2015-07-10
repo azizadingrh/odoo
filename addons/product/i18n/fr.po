@@ -197,7 +197,7 @@ msgid ""
 "                promotions.\n"
 "              </p>\n"
 "            "
-msgstr "<p class=\"oe_view_nocontent_create\">\n                Cliquez pour créer une nouvelle liste de prix.\n              </p><p>\nUne liste de prix regroupe les règles pour calculer le prix d'achat. La liste\nde prix par défaut n'a qu'une règle : \"utiliser le coût de revient défini pour\nl'article\". Vous n'avez donc pas besoin de gérer de liste de prix fournisseurs\nsi vos besoins sont simples.\n              </p><p>\nCependant vous pouvez importer des listes de prix complexes fournies par\nvos fournisseurs, qui peuvent dépendre des quantités commandées ou de\npromotions en cours.\n              </p>\n            "
+msgstr "<p class=\"oe_view_nocontent_create\">\n                Cliquez pour créer une nouvelle liste de prix.\n              </p><p>\nUne liste de prix regroupe les règles pour calculer le prix d'achat. La liste\nde prix par défaut n'a qu'une règle : \"utiliser le prix de valorisation défini pour\nl'article\". Vous n'avez donc pas besoin de gérer de liste de prix fournisseurs\nsi vos besoins sont simples.\n              </p><p>\nCependant vous pouvez importer des listes de prix complexes fournies par\nvos fournisseurs, qui peuvent dépendre des quantités commandées ou de\npromotions en cours.\n              </p>\n            "
 
 #. module: product
 #: model:ir.actions.act_window,help:product.product_pricelist_action2
@@ -1095,7 +1095,7 @@ msgstr "La conversion d'unité de mesure (UdM) de l'article %s dans l'UdM par d�
 #: model:product.price.type,name:product.standard_price
 #: field:product.template,standard_price:0
 msgid "Cost Price"
-msgstr "Prix de revient"
+msgstr "Prix de valorisation"
 
 #. module: product
 #: help:product.template,standard_price:0
@@ -1103,7 +1103,7 @@ msgid ""
 "Cost price of the product template used for standard stock valuation in "
 "accounting and used as a base price on purchase orders. Expressed in the "
 "default unit of measure of the product."
-msgstr "Coût de revient du modèle d'article utilisé pour la valorisation de stock standard en comptabilité et utilisé comme prix de base pour les commandes d'achat. Exprimé dans l'unité de mesure par défaut de l'article."
+msgstr "Coût de valorisation du modèle d'article utilisé pour la valorisation de stock standard en comptabilité et utilisé comme prix de base pour les commandes d'achat. Exprimé dans l'unité de mesure par défaut de l'article."
 
 #. module: product
 #: field:pricelist.partnerinfo,create_uid:0
