@@ -241,6 +241,7 @@ class website_sale(http.Controller):
 
         if category:
             category = category_obj.browse(cr, uid, int(category), context=context)
+            category = category if category.exists() else False
 
         attrib_list = request.httprequest.args.getlist('attrib')
         attrib_values = [map(int,v.split("-")) for v in attrib_list if v]
@@ -526,7 +527,7 @@ class website_sale(http.Controller):
 
         partner_lang = request.lang if request.lang in [lang.code for lang in request.website.language_ids] else None
 
-        billing_info = {}
+        billing_info = {'customer': True}
         if partner_lang:
             billing_info['lang'] = partner_lang
         billing_info.update(self.checkout_parse('billing', checkout, True))
@@ -766,8 +767,8 @@ class website_sale(http.Controller):
                 message = '<p>%s</p>' % _('Your transaction is waiting confirmation.')
                 if tx.acquirer_id.post_msg:
                     message += tx.acquirer_id.post_msg
-            else:
-                message = '<p>%s</p>' % _('Your transaction is waiting confirmation.')
+            elif state == 'error':
+                message = '<p>%s</p>' % _('An error occurred during the transaction.')
             validation = tx.acquirer_id.validation
 
         return {
