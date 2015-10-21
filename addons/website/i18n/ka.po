@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: Odoo 8.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-07-22 08:25+0000\n"
-"PO-Revision-Date: 2015-09-21 16:18+0000\n"
+"PO-Revision-Date: 2015-10-13 13:28+0000\n"
 "Last-Translator: Temur Vibliani\n"
 "Language-Team: Georgian (http://www.transifex.com/odoo/odoo-8/language/ka/)\n"
 "MIME-Version: 1.0\n"
@@ -888,7 +888,7 @@ msgstr "გაუქმება"
 #: code:addons/website/static/src/xml/website.editor.xml:298
 #, python-format
 msgid "Discard edition"
-msgstr ""
+msgstr "ცვლილებების გაუქმება"
 
 #. module: website
 #: view:website:website.snippets
@@ -1046,7 +1046,7 @@ msgstr "შეცდომა"
 #. module: website
 #: view:website:website.http_error_debug
 msgid "Error message:"
-msgstr ""
+msgstr "შეცდომის შეტყობინება:"
 
 #. module: website
 #. openerp-web
@@ -1099,7 +1099,7 @@ msgstr ""
 #. module: website
 #: view:website:website.snippet_options
 msgid "Fast"
-msgstr ""
+msgstr "სწრაფი"
 
 #. module: website
 #: view:website:website.snippets
@@ -1298,7 +1298,7 @@ msgstr ""
 #: view:website:website.403 view:website:website.404
 #: view:website:website.layout
 msgid "Homepage"
-msgstr ""
+msgstr "მთავარი გვერდი"
 
 #. module: website
 #. openerp-web
@@ -1468,7 +1468,7 @@ msgstr ""
 #. module: website
 #: view:website:website.themes
 msgid "Journal"
-msgstr ""
+msgstr "ჟურნალი"
 
 #. module: website
 #: view:website:website.snippet_options
@@ -1731,7 +1731,7 @@ msgstr "Odoo"
 #. module: website
 #: view:website:website.info
 msgid "Odoo Version"
-msgstr ""
+msgstr "Odoo ვერსია"
 
 #. module: website
 #: view:website:website.snippets
@@ -2406,22 +2406,22 @@ msgstr ""
 #: view:website:website.snippet_options
 #, python-format
 msgid "Style"
-msgstr ""
+msgstr "სტილი"
 
 #. module: website
 #: view:website:website.layout
 msgid "Subtitle"
-msgstr ""
+msgstr "ქვესათაური"
 
 #. module: website
 #: view:website:website.layout
 msgid "Subtitle 2"
-msgstr ""
+msgstr "ქვესათაური 2"
 
 #. module: website
 #: view:website:website.layout
 msgid "Subtitle 3"
-msgstr ""
+msgstr "ქვესათაური 3"
 
 #. module: website
 #. openerp-web
@@ -3227,7 +3227,7 @@ msgstr ""
 #. module: website
 #: view:website:website.snippets
 msgid "per month"
-msgstr ""
+msgstr "ყოველთვიურად"
 
 #. module: website
 #: view:website:website.snippets
