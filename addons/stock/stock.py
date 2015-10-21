@@ -1496,7 +1496,7 @@ class stock_picking(osv.osv):
         #write qty_done into field product_qty for every package_operation before doing the transfer
         pack_op_obj = self.pool.get('stock.pack.operation')
         for operation in self.browse(cr, uid, picking_id, context=context).pack_operation_ids:
-            pack_op_obj.write(cr, uid, operation.id, {'product_qty': operation.qty_done}, context=context)
+            pack_op_obj.write(cr, uid, operation.id, {'product_qty': operation.qty_done}, context=dict(context, no_recompute=True))
         self.do_transfer(cr, uid, [picking_id], context=context)
         #return id of next picking to work on
         return self.get_next_picking_for_ui(cr, uid, context=context)
@@ -2267,7 +2267,7 @@ class stock_move(osv.osv):
         """
         context = context or {}
         quant_obj = self.pool.get("stock.quant")
-        to_assign_moves = []
+        to_assign_moves = set()
         main_domain = {}
         todo_moves = []
         operations = set()
@@ -2275,12 +2275,12 @@ class stock_move(osv.osv):
             if move.state not in ('confirmed', 'waiting', 'assigned'):
                 continue
             if move.location_id.usage in ('supplier', 'inventory', 'production'):
-                to_assign_moves.append(move.id)
+                to_assign_moves.add(move.id)
                 #in case the move is returned, we want to try to find quants before forcing the assignment
                 if not move.origin_returned_move_id:
                     continue
             if move.product_id.type == 'consu':
-                to_assign_moves.append(move.id)
+                to_assign_moves.add(move.id)
                 continue
             else:
                 todo_moves.append(move)
@@ -2326,9 +2326,8 @@ class stock_move(osv.osv):
 
         #force assignation of consumable products and incoming from supplier/inventory/production
         if to_assign_moves:
-            return self.force_assign(cr, uid, to_assign_moves, context=context)
-        else:
-            return True
+            self.force_assign(cr, uid, list(to_assign_moves), context=context)
+        return True
 
     def action_cancel(self, cr, uid, ids, context=None):
         """ Cancels the moves and if all moves are cancelled it cancels the picking.
