@@ -1673,7 +1673,7 @@
                     </div>
                     <group>
                         <field name="product_id"/>
-                        <field name="qty"/>
+                        <field name="qty" digits="(14,3)"/>
                         <field name="lot_id" groups="stock.group_production_lot"/>
                         <field name="package_id" groups="stock.group_tracking_lot"/>
                         <field name="location_id"/>
@@ -1695,7 +1695,7 @@
             <field name="arch" type="xml">
                 <tree string="Quants" create="0">
                     <field name="product_id"/>
-                    <field name="qty"/>
+                    <field name="qty" digits="(14,3)"/>
                     <field name="location_id"/>
                     <field name="owner_id" groups="stock.group_tracking_owner"/>
                     <field name="lot_id" groups="stock.group_production_lot"/>
