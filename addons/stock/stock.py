@@ -2264,6 +2264,7 @@ class stock_move(osv.osv):
 
     def action_assign(self, cr, uid, ids, context=None):
         """ Checks the product type and accordingly writes the state.
+        @return: True
         """
         context = context or {}
         quant_obj = self.pool.get("stock.quant")
