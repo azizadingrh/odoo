@@ -1186,10 +1186,10 @@ class purchase_order_line(osv.osv):
         account_tax = self.pool.get('account.tax')
 
         # - check for the presence of partner_id and pricelist_id
-        #if not partner_id:
-        #    raise osv.except_osv(_('No Partner!'), _('Select a partner in purchase order to choose a product.'))
-        #if not pricelist_id:
-        #    raise osv.except_osv(_('No Pricelist !'), _('Select a price list in the purchase order form before choosing a product.'))
+        if not partner_id:
+            raise osv.except_osv(_('No Partner!'), _('Select a partner in purchase order to choose a product.'))
+        if not pricelist_id:
+            raise osv.except_osv(_('No Pricelist !'), _('Select a price list in the purchase order form before choosing a product.'))
 
         # - determine name and notes based on product in partner lang.
         context_partner = context.copy()
