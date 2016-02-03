@@ -66,6 +66,9 @@ function openerp_picking_widgets(instance){
                     if (packopline.product_id[1] !== undefined){ pack = packopline.package_id[1];}
                     if (packopline.product_qty == packopline.qty_done){ color = "success "; }
                     if (packopline.product_qty < packopline.qty_done){ color = "danger "; }
+                    if (packopline.expected == false){ color = "danger "; }
+                    if (packopline.product_qty == 0 && packopline.expected == true){color = "warning ";}
+
                     //also check that we don't have a line already existing for that package
                     if (packopline.result_package_id[1] !== undefined && $.inArray(packopline.result_package_id[0], pack_created) === -1){
                         var myPackage = $.grep(model.packages, function(e){ return e.id == packopline.result_package_id[0]; })[0];
