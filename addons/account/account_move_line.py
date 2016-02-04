@@ -669,8 +669,7 @@ class account_move_line(osv.osv):
 
     #TODO: ONCHANGE_ACCOUNT_ID: set account_tax_id
     def onchange_currency(self, cr, uid, ids, account_id, amount, currency_id, date=False, journal=False, context=None):
-        if context is None:
-            context = {}
+        context = dict(context or {})
         account_obj = self.pool.get('account.account')
         journal_obj = self.pool.get('account.journal')
         currency_obj = self.pool.get('res.currency')
@@ -747,7 +746,7 @@ class account_move_line(osv.osv):
             tax_ids = res.tax_ids
             if tax_ids and partner_id:
                 part = partner_obj.browse(cr, uid, partner_id, context=context)
-                tax_id = fiscal_pos_obj.map_tax(cr, uid, part and part.property_account_position or False, tax_ids)[0]
+                tax_id = fiscal_pos_obj.map_tax(cr, uid, part and part.property_account_position or False, tax_ids, context=context)[0]
             else:
                 tax_id = tax_ids and tax_ids[0].id or False
             val['account_tax_id'] = tax_id
@@ -1087,8 +1086,7 @@ class account_move_line(osv.osv):
         return r_id
 
     def view_header_get(self, cr, user, view_id, view_type, context=None):
-        if context is None:
-            context = {}
+        context = dict(context or {})
         context = self.convert_to_period(cr, user, context=context)
         if context.get('account_id', False):
             cr.execute('SELECT code FROM account_account WHERE id = %s', (context['account_id'], ))
@@ -1096,14 +1094,20 @@ class account_move_line(osv.osv):
             if res:
                 res = _('Entries: ')+ (res[0] or '')
             return res
-        if (not context.get('journal_id', False)) or (not context.get('period_id', False)):
+        if (not (context.get('journal_id', False) or context.get('journal_name', False))) or (not context.get('period_id', False)):
             return False
         if context.get('search_default_journal_id', False):
             context['journal_id'] = context.get('search_default_journal_id')
-        cr.execute('SELECT code FROM account_journal WHERE id = %s', (context['journal_id'], ))
-        j = cr.fetchone()[0] or ''
+        if context.get('journal_name', False):
+            cr.execute('SELECT code FROM account_journal WHERE name ilike %s', (context['journal_name'], ))
+        else:
+            cr.execute('SELECT code FROM account_journal WHERE id = %s', (context['journal_id'], ))
+
+        j = cr.fetchone()
+        j = (j and j[0]) or ''
         cr.execute('SELECT code FROM account_period WHERE id = %s', (context['period_id'], ))
-        p = cr.fetchone()[0] or ''
+        p = cr.fetchone()
+        p = (p and p[0]) or ''
         if j or p:
             return j + (p and (':' + p) or '')
         return False
