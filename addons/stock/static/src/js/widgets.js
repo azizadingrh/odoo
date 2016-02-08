@@ -837,7 +837,10 @@ function openerp_picking_widgets(instance){
         },
         get_header: function(){
             if(this.picking){
-                return this.picking.name;
+                if (this.picking.partner_id){
+                    return this.picking.name + ' : ' + this.picking.partner_id[1];
+                }
+                return this.picking.name
             }else{
                 return '';
             }
