@@ -60,6 +60,10 @@ function openerp_picking_widgets(instance){
             this.rows = [];
             var self = this;
             var pack_created = [];
+            var expected_products = []
+            _.each( model.packoplines, function(packopline){
+                if (packopline.expected == true){expected_products.push(packopline.product_id[0]);}
+            });
             _.each( model.packoplines, function(packopline){
                     var pack = undefined;
                     var color = "";
@@ -95,6 +99,8 @@ function openerp_picking_widgets(instance){
                         });
                         pack_created.push(packopline.result_package_id[0]);
                     }
+                    
+                    var pexpected = $.inArray(packopline.product_id[0], expected_products) !== -1;
                     self.rows.push({
                         cols: { product: packopline.product_id[1] || packopline.package_id[1],
                                 qty: packopline.product_qty,
@@ -113,6 +119,7 @@ function openerp_picking_widgets(instance){
                                 processed: packopline.processed,
                                 package_id: undefined,
                                 ul_id: -1,
+                                expected: pexpected,
                         },
                         classes: color + (packopline.result_package_id[1] !== undefined ? 'in_container_hidden ' : '') + (packopline.processed === "true" ? 'processed hidden ':''),
                     });
