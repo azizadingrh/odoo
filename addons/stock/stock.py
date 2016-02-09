@@ -4128,12 +4128,14 @@ class stock_pack_operation(osv.osv):
         'location_id': fields.many2one('stock.location', 'Source Location', required=True),
         'location_dest_id': fields.many2one('stock.location', 'Destination Location', required=True),
         'processed': fields.selection([('true','Yes'), ('false','No')],'Has been processed?', required=True),
+        'expected': fields.boolean('product expected ?', help="Is a product added is an expected one or not ?")
     }
 
     _defaults = {
         'date': fields.date.context_today,
         'qty_done': 0,
         'processed': lambda *a: 'false',
+        'expected': lambda *a: 'true',
     }
 
     def write(self, cr, uid, ids, vals, context=None):
@@ -4161,6 +4163,8 @@ class stock_pack_operation(osv.osv):
         processed_ids = []
         move_obj = self.pool.get("stock.move")
         for pack_op in self.browse(cr, uid, ids, context=None):
+            if not pack_op.expected:
+                raise osv.except_osv(_('Error!'), _('At least one product is not expected on the shipping (red lines).'))
             if pack_op.product_id and pack_op.location_id and pack_op.location_dest_id:
                 move_obj.check_tracking_product(cr, uid, pack_op.product_id, pack_op.lot_id.id, pack_op.location_id, pack_op.location_dest_id, context=context)
             op = pack_op.id
@@ -4230,17 +4234,30 @@ class stock_pack_operation(osv.osv):
                 'product_qty': 0,
                 'location_id': picking.location_id.id, 
                 'location_dest_id': picking.location_dest_id.id,
-                'qty_done': 1,
+                'qty_done': 1
                 }
+
+            product_id = False
             for key in domain:
                 var_name, dummy, value = key
                 uom_id = False
                 if var_name == 'product_id':
                     uom_id = self.pool.get('product.product').browse(cr, uid, value, context=context).uom_id.id
+                    product_id = value
                 update_dict = {var_name: value}
                 if uom_id:
                     update_dict['product_uom_id'] = uom_id
                 values.update(update_dict)
+
+            # search if product is expected
+            expected = True
+            product_expected = self.search(cr, uid, [('picking_id', '=', picking_id),
+                                                     ('product_id','=', product_id),
+                                                     ('expected', '=', True)], context=context)
+            if not product_expected:
+                expected = False
+            values.update({'expected': expected})
+
             operation_id = self.create(cr, uid, values, context=context)
         return operation_id
 
