@@ -217,7 +217,7 @@ class sale_order_line(osv.osv):
         'product_packaging': fields.many2one('product.packaging', 'Packaging'),
         'number_packages': fields.function(_number_packages, type='integer', string='Number Packages'),
         'route_id': fields.many2one('stock.location.route', 'Route', domain=[('sale_selectable', '=', True)]),
-        'product_tmpl_id': fields.related('product_id', 'product_tmpl_id', type='many2one', relation='product.template', string='Product Template'),
+        'product_tmpl_id': fields.related('product_id', 'product_tmpl_id', type='many2one', relation='product.template', string='Product Template', readonly=True),
     }
 
     _defaults = {
@@ -447,12 +447,13 @@ class stock_picking(osv.osv):
         """ Inherit the original function of the 'stock' module
             We select the partner of the sales order as the partner of the customer invoice
         """
-        if picking.sale_id:
-            saleorder_ids = self.pool['sale.order'].search(cr, uid, [('procurement_group_id' ,'=', picking.group_id.id)], context=context)
-            saleorders = self.pool['sale.order'].browse(cr, uid, saleorder_ids, context=context)
-            if saleorders and saleorders[0] and saleorders[0].order_policy == 'picking':
-                saleorder = saleorders[0]
-                return saleorder.partner_invoice_id.id
+        if context.get('inv_type') and context['inv_type'] in ('out_invoice', 'out_refund'):
+            if picking.sale_id:
+                saleorder_ids = self.pool['sale.order'].search(cr, uid, [('procurement_group_id' ,'=', picking.group_id.id)], context=context)
+                saleorders = self.pool['sale.order'].browse(cr, uid, saleorder_ids, context=context)
+                if saleorders and saleorders[0] and saleorders[0].order_policy == 'picking':
+                    saleorder = saleorders[0]
+                    return saleorder.partner_invoice_id.id
         return super(stock_picking, self)._get_partner_to_invoice(cr, uid, picking, context=context)
     
     def _get_sale_id(self, cr, uid, ids, name, args, context=None):
