@@ -524,6 +524,13 @@ msgid "Assigned Moves"
 msgstr "Mouvements assignés"
 
 #. module: stock
+#: code:addons/addons/stock/stock.py:4167
+#: code:addons/stock/stock.py:4167
+#, python-format
+msgid "At least one product is not expected on the shipping (red lines)."
+msgstr "Au moins un produit est imprévu dans la livraison (ligne rouge)."
+
+#. module: stock
 #: field:stock.location.path,auto:0 selection:stock.location.path,auto:0
 msgid "Automatic Move"
 msgstr "Mouvement automatique"
