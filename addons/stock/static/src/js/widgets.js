@@ -758,8 +758,8 @@ function openerp_picking_widgets(instance){
             });
 
             this.$('.js_pick_quit').click(function(){ self.quit(); });
-            this.$('.js_pick_prev').click(function(){ self.picking_prev(); });
-            this.$('.js_pick_next').click(function(){ self.picking_next(); });
+            this.$('.js_pick_prev').click(function(){ self.picking_prev(); $(".js_pick_prev").blur(); });
+            this.$('.js_pick_next').click(function(){ self.picking_next(); $(".js_pick_next").blur(); });
             this.$('.js_pick_menu').click(function(){ self.menu(); });
             this.$('.js_reload_op').click(function(){ self.reload_pack_operation();});
 
