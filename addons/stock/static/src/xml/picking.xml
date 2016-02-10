@@ -122,7 +122,7 @@
                         <th class='text-center' width="150">Scanned</th>
                         <th class='text-center'>Todo</th>
                         <th>From</th>
-                        <th>To</th>
+                        <!-- <th>To</th> Ask by FDL -->
                     </tr>
                 </thead>
 
@@ -157,7 +157,8 @@
                                 <t t-if="row.cols.lot" ><span> : <t t-esc="row.cols.lot" /></span></t>
                                 <t t-if="row.cols.lot_use_date" ><span>(<t t-esc="row.cols.lot_use_date" />)</span></t>
                             </td>
-                            <td class="brctbl-col5 js_loc"> <t t-esc="row.cols.dest" />
+                            <td class="brctbl-col5 js_loc"> 
+                                <!-- <t t-esc="row.cols.dest" />  Ask by FDL -->
                                 <div class="pull-right btn-group">
                                     <button type="button" class="btn btn-default dropdown-toggle fa fa-cog" data-toggle="dropdown">
                                      <span class="caret"></span>
