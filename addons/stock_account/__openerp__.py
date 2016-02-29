@@ -21,7 +21,7 @@
 
 {
     'name': 'WMS Accounting',
-    'version': '1.1',
+    'version': '1.1.2',
     'author': 'OpenERP SA',
     'summary': 'Inventory, Logistic, Valuation, Accounting',
     'description': """
@@ -57,6 +57,7 @@ Dashboard / Reports for Warehouse Management includes:
         'product_view.xml',
         'stock_account_view.xml',
         'res_config_view.xml',
+        'ir_cron_data.xml',
     ],
     'test': [
 

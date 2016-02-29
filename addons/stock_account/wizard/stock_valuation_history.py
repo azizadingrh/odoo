@@ -1,8 +1,11 @@
 
+import logging
+
 from datetime import datetime
-from openerp import tools
 from openerp.osv import fields, osv
 from openerp.tools.translate import _
+
+_logger = logging.getLogger(__name__)
 
 class wizard_valuation_history(osv.osv_memory):
 
@@ -25,12 +28,11 @@ class wizard_valuation_history(osv.osv_memory):
         ctx = context.copy()
         ctx['history_date'] = data['date']
         ctx['search_default_group_by_product'] = True
-        ctx['search_default_group_by_location'] = True
         return {
-            'domain': "[('date', '<=', '" + data['date'] + "')]",
+            'domain': "['|',('date','=',False),('date', '>=', '" + data['date'] + "')]",
             'name': _('Stock Value At Date'),
             'view_type': 'form',
-            'view_mode': 'tree,graph',
+            'view_mode': 'graph,tree',
             'res_model': 'stock.history',
             'type': 'ir.actions.act_window',
             'context': ctx,
@@ -108,15 +110,17 @@ class stock_history(osv.osv):
         'product_categ_id': fields.many2one('product.category', 'Product Category', required=True),
         'quantity': fields.float('Product Quantity'),
         'date': fields.datetime('Operation Date'),
-        'price_unit_on_quant': fields.float('Value'),
+        'price_unit_on_quant': fields.float('Value', group_operator = 'avg'),
         'inventory_value': fields.function(_get_inventory_value, string="Inventory Value", type='float', readonly=True),
         'source': fields.char('Source')
     }
 
     def init(self, cr):
-        tools.drop_view_if_exists(cr, 'stock_history')
         cr.execute("""
-            CREATE OR REPLACE VIEW stock_history AS (
+            DROP MATERIALIZED VIEW IF EXISTS stock_history
+        """)
+        cr.execute("""
+            CREATE MATERIALIZED VIEW stock_history AS (
               SELECT MIN(id) as id,
                 move_id,
                 location_id,
@@ -128,17 +132,42 @@ class stock_history(osv.osv):
                 SUM(price_unit_on_quant * quantity) / SUM(quantity) as price_unit_on_quant,
                 source
                 FROM
-                ((SELECT
+                (
+                -- WE START FROM THE STOCK QUANTS
+                (SELECT
+                    quant.id + 1000000000 AS id,
+                    NULL::INT AS move_id,
+                    dest_location.id AS location_id,
+                    dest_location.company_id AS company_id,
+                    quant.product_id AS product_id,
+                    product_template.categ_id AS product_categ_id,
+                    quant.qty AS quantity,
+                    NULL::TIMESTAMP AS date,
+                    quant.cost AS price_unit_on_quant,
+                    'Current stock'::TEXT AS source
+                FROM
+                    stock_quant as quant
+                JOIN
+                    product_product ON product_product.id = quant.product_id
+                JOIN
+                   stock_location dest_location ON quant.location_id = dest_location.id
+                JOIN
+                    product_template ON product_template.id = product_product.product_tmpl_id
+                WHERE quant.qty>0 AND
+                    dest_location.usage IN ('internal', 'transit')
+                ) UNION ALL
+                -- We subtract the entering moves as we go back in time
+                (SELECT
                     stock_move.id AS id,
                     stock_move.id AS move_id,
                     dest_location.id AS location_id,
                     dest_location.company_id AS company_id,
                     stock_move.product_id AS product_id,
                     product_template.categ_id AS product_categ_id,
-                    quant.qty AS quantity,
+                    - quant.qty AS quantity,
                     stock_move.date AS date,
                     quant.cost as price_unit_on_quant,
-                    stock_move.origin AS source
+                    COALESCE(stock_move.origin, stock_move.name) AS source
                 FROM
                     stock_move
                 JOIN
@@ -160,6 +189,7 @@ class stock_history(osv.osv):
                     source_location.company_id != dest_location.company_id or
                     source_location.usage not in ('internal', 'transit'))
                 ) UNION ALL
+                -- We add back outgoing moves as we go back in time
                 (SELECT
                     (-1) * stock_move.id AS id,
                     stock_move.id AS move_id,
@@ -167,10 +197,10 @@ class stock_history(osv.osv):
                     source_location.company_id AS company_id,
                     stock_move.product_id AS product_id,
                     product_template.categ_id AS product_categ_id,
-                    - quant.qty AS quantity,
+                    quant.qty AS quantity,
                     stock_move.date AS date,
                     quant.cost as price_unit_on_quant,
-                    stock_move.origin AS source
+                    COALESCE(stock_move.origin, stock_move.name) AS source
                 FROM
                     stock_move
                 JOIN
@@ -194,4 +224,20 @@ class stock_history(osv.osv):
                 ))
                 AS foo
                 GROUP BY move_id, location_id, company_id, product_id, product_categ_id, date, source
-            )""")
+            ) WITH DATA""")
+        cr.execute("""
+            CREATE INDEX STOCK_HISTORY_ID
+            ON STOCK_HISTORY(ID, COMPANY_ID)
+        """)
+        cr.execute("""
+            CREATE INDEX STOCK_HISTORY_ALL
+            ON STOCK_HISTORY(PRODUCT_ID, COMPANY_ID, DATE, LOCATION_ID, ID)
+        """)
+
+    def refresh(self, cr, uid, context=None):
+        """Refresh the data (to be used in cron jobs"""
+        _logger.info("Refreshing stock history")
+        cr.execute("""
+            REFRESH MATERIALIZED VIEW stock_history
+        """)
+        return True

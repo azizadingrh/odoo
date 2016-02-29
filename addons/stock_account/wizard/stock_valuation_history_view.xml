@@ -89,10 +89,10 @@
             <field name="name">Current Inventory Valuation</field>
             <field name="res_model">stock.history</field>
             <field name="type">ir.actions.act_window</field>
-            <field name="domain">[('date','&lt;=',time.strftime('%Y-%m-%d %H:%M:%S'))]</field>
+            <field name="domain">[('date','=',False)]</field>
             <field name="view_type">form</field>
-            <field name="view_mode">tree,graph</field>
-            <field name="context">{'search_default_group_by_product': True, 'search_default_group_by_location': True}</field>
+            <field name="view_mode">graph,tree</field>
+            <field name="context">{'search_default_group_by_product': True}</field>
     </record>
     <menuitem action="action_history_tree"
             id="menu_action_history_tree"

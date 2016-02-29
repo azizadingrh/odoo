@@ -853,6 +853,13 @@ class product_template(osv.osv):
             cr, user, '', args=[('id', 'in', list(template_ids))],
             operator='ilike', context=context, limit=limit)
 
+    def action_price_history(self, cr, uid, ids, context=None):
+        return {'type': 'ir.actions.act_window',
+                'res_model': 'product.price.history',
+                'view_mode': 'tree',
+                'domain': [('product_template_id', 'in', ids)],
+                'target': 'new'}
+
 class product_product(osv.osv):
     _name = "product.product"
     _description = "Product"
@@ -1229,6 +1236,14 @@ class product_product(osv.osv):
         else:
             return uom_obj._compute_qty_obj(cr, uid, uom, qty, uos)
 
+    def action_price_history(self, cr, uid, ids, context=None):
+        products = self.browse(cr, uid, ids, context=context)
+        return {'type': 'ir.actions.act_window',
+                'res_model': 'product.price.history',
+                'view_mode': 'tree',
+                'domain': [('product_template_id', 'in',
+                            [p.product_tmpl_id.id for p in products])],
+                'target': 'new'}
 
 
 class product_packaging(osv.osv):
