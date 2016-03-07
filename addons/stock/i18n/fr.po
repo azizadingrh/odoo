@@ -524,11 +524,25 @@ msgid "Assigned Moves"
 msgstr "Mouvements assignés"
 
 #. module: stock
-#: code:addons/addons/stock/stock.py:4167
-#: code:addons/stock/stock.py:4167
+#: code:addons/addons/stock/stock.py:4177
+#: code:addons/stock/stock.py:4177
 #, python-format
 msgid "At least one product is not expected on the shipping (red lines)."
 msgstr "Au moins un produit est imprévu dans la livraison (ligne rouge)."
+
+#. module: stock
+#: code:addons/addons/stock/stock.py:4179
+#: code:addons/stock/stock.py:4179
+#, python-format
+msgid "You have picked a product without best before date (red lines)."
+msgstr "Vous avez scanné un produit sans DLUO (ligne rouge)."
+
+#. module: stock
+#: code:addons/addons/stock/stock.py:4181
+#: code:addons/stock/stock.py:4181
+#, python-format
+msgid "You have picked more product than expected (red lines)."
+msgstr "Vous avez pris trop de produits (ligne rouge)."
 
 #. module: stock
 #: field:stock.location.path,auto:0 selection:stock.location.path,auto:0

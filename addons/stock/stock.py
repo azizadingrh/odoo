@@ -4162,9 +4162,26 @@ class stock_pack_operation(osv.osv):
         '''
         processed_ids = []
         move_obj = self.pool.get("stock.move")
+        product_qty_picked = {}
+        product_qty_expected = {}
+        # control qty picked
         for pack_op in self.browse(cr, uid, ids, context=None):
+            qty_picked = product_qty_picked.get(pack_op.product_id.id, 0)
+            qty_expected = product_qty_expected.get(pack_op.product_id.id, 0)
+            qty_picked += pack_op.qty_done
+            product_qty_picked[pack_op.product_id.id] = qty_picked
+            if pack_op.expected:
+                qty_expected += pack_op.product_qty
+                product_qty_expected[pack_op.product_id.id] = qty_expected
             if not pack_op.expected:
                 raise osv.except_osv(_('Error!'), _('At least one product is not expected on the shipping (red lines).'))
+            if not pack_op.use_date:
+                raise osv.except_osv(_('Error!'), _('You have picked a product without best before date (red lines).'))
+            if qty_picked > qty_expected:
+                raise osv.except_osv(_('Error!'), _('You have picked more product than expected (red lines).'))
+
+        # process lines
+        for pack_op in self.browse(cr, uid, ids, context=None):
             if pack_op.product_id and pack_op.location_id and pack_op.location_dest_id:
                 move_obj.check_tracking_product(cr, uid, pack_op.product_id, pack_op.lot_id.id, pack_op.location_id, pack_op.location_dest_id, context=context)
             op = pack_op.id
