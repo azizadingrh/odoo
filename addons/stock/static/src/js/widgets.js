@@ -60,9 +60,19 @@ function openerp_picking_widgets(instance){
             this.rows = [];
             var self = this;
             var pack_created = [];
-            var expected_products = []
+            var expected_products = [];
+            var product_total_qty = {};
+            var product_expected_qty = {};
             _.each( model.packoplines, function(packopline){
-                if (packopline.expected == true){expected_products.push(packopline.product_id[0]);}
+                if (packopline.expected == true){
+                        expected_products.push(packopline.product_id[0]);
+                        qty = product_expected_qty[packopline.product_id[0]] || 0;
+                        qty += packopline.product_qty;
+                        product_expected_qty[packopline.product_id[0]] = qty;
+                    }
+                    tot_qty = product_total_qty[packopline.product_id[0]] || 0;
+                    tot_qty += packopline.qty_done;
+                    product_total_qty[packopline.product_id[0]] = tot_qty;
             });
             _.each( model.packoplines, function(packopline){
                     var pack = undefined;
@@ -72,6 +82,9 @@ function openerp_picking_widgets(instance){
                     if (packopline.product_qty < packopline.qty_done){ color = "danger "; }
                     if (packopline.expected == false){ color = "danger "; }
                     if (packopline.product_qty == 0 && packopline.expected == true){color = "warning ";}
+                    //if (product_total_qty[packopline.product_id[0]] == product_expected_qty[packopline.product_id[0]]){ color = "success "; }
+                    if (product_total_qty[packopline.product_id[0]] > product_expected_qty[packopline.product_id[0]]) {color = "danger ";}
+                    if (packopline.use_date === undefined || packopline.use_date == ''){ color = "danger "; }
 
                     //also check that we don't have a line already existing for that package
                     if (packopline.result_package_id[1] !== undefined && $.inArray(packopline.result_package_id[0], pack_created) === -1){
@@ -102,13 +115,17 @@ function openerp_picking_widgets(instance){
                     }
                     
                     var pexpected = $.inArray(packopline.product_id[0], expected_products) !== -1;
+                    var dluo = "*** Sans DLUO ***";
+                    if (packopline.use_date !== undefined && packopline.use_date != ''){
+                            dluo = packopline.use_date.slice(8,10) +'/'+ packopline.use_date.slice(5,7) +'/'+ packopline.use_date.slice(0,4);
+                        }
                     self.rows.push({
                         cols: { product: packopline.product_id[1] || packopline.package_id[1],
                                 qty: packopline.product_qty,
                                 rem: packopline.qty_done,
                                 uom: packopline.product_uom_id[1],
                                 lot: packopline.lot_id[1],
-                                lot_use_date: packopline.use_date.slice(8,10) +'/'+ packopline.use_date.slice(5,7) +'/'+ packopline.use_date.slice(0,4),
+                                lot_use_date: dluo,
                                 pack: pack,
                                 container: packopline.result_package_id[1],
                                 container_id: packopline.result_package_id[0],
