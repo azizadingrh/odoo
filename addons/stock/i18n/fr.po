@@ -538,8 +538,8 @@ msgid "You have picked a product without best before date (red lines)."
 msgstr "Vous avez scanné un produit sans DLUO (ligne rouge)."
 
 #. module: stock
-#: code:addons/addons/stock/stock.py:4181
-#: code:addons/stock/stock.py:4181
+#: code:addons/addons/stock/stock.py:4186
+#: code:addons/stock/stock.py:4186
 #, python-format
 msgid "You have picked more product than expected (red lines)."
 msgstr "Vous avez pris trop de produits (ligne rouge)."
