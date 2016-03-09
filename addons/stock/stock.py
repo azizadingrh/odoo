@@ -4162,28 +4162,7 @@ class stock_pack_operation(osv.osv):
         '''
         processed_ids = []
         move_obj = self.pool.get("stock.move")
-        product_qty_picked = {}
-        product_qty_expected = {}
-        # control qty picked
         for pack_op in self.browse(cr, uid, ids, context=None):
-            qty_picked = product_qty_picked.get(pack_op.product_id.id, 0)
-            qty_picked += pack_op.qty_done
-            product_qty_picked[pack_op.product_id.id] = qty_picked
-            if pack_op.expected:
-                qty_expected = product_qty_expected.get(pack_op.product_id.id, 0)
-                qty_expected += pack_op.product_qty
-                product_qty_expected[pack_op.product_id.id] = qty_expected
-            if not pack_op.expected:
-                raise osv.except_osv(_('Error!'), _('At least one product is not expected on the shipping (red lines).'))
-            if not pack_op.use_date:
-                raise osv.except_osv(_('Error!'), _('You have picked a product without best before date (red lines).'))
-
-        # process lines
-        for pack_op in self.browse(cr, uid, ids, context=None):
-            qty_picked = product_qty_picked.get(pack_op.product_id.id, 0)
-            qty_expected = product_qty_expected.get(pack_op.product_id.id, 0)
-            if qty_picked > qty_expected:
-                raise osv.except_osv(_('Error!'), _('You have picked more product than expected (red lines).'))
             if pack_op.product_id and pack_op.location_id and pack_op.location_dest_id:
                 move_obj.check_tracking_product(cr, uid, pack_op.product_id, pack_op.lot_id.id, pack_op.location_id, pack_op.location_dest_id, context=context)
             op = pack_op.id
@@ -4243,7 +4222,8 @@ class stock_pack_operation(osv.osv):
                     #we have a line with 0 qty set, so delete it
                     self.unlink(cr, uid, [operation_id], context=context)
                     return False
-            self.write(cr, uid, [operation_id], {'qty_done': qty}, context=context)
+            #self.write(cr, uid, [operation_id], {'qty_done': qty}, context=context)
+            self.balance_operations(cr, uid, operation_id, qty, context=context)
         else:
             #no existing operation found for the given domain and picking => create a new one
             picking_obj = self.pool.get("stock.picking")
@@ -4253,7 +4233,8 @@ class stock_pack_operation(osv.osv):
                 'product_qty': 0,
                 'location_id': picking.location_id.id, 
                 'location_dest_id': picking.location_dest_id.id,
-                'qty_done': 1
+                'qty_done': 1,
+                'expected': False
                 }
 
             product_id = False
@@ -4269,17 +4250,51 @@ class stock_pack_operation(osv.osv):
                 values.update(update_dict)
 
             # search if product is expected
-            expected = True
-            product_expected = self.search(cr, uid, [('picking_id', '=', picking_id),
+            product_correct = self.search(cr, uid, [('picking_id', '=', picking_id),
                                                      ('product_id','=', product_id),
                                                      ('expected', '=', True)], context=context)
-            if not product_expected:
-                expected = False
-            values.update({'expected': expected})
+            if not product_correct:
+                raise osv.except_osv(_('Error!'), _('This product is not expected.'))
 
             operation_id = self.create(cr, uid, values, context=context)
+            self.balance_operations(cr, uid, operation_id, values['qty_done'], context=context)
         return operation_id
 
+    def balance_operations(self, cr, uid, id, qty_done, context=None):
+        """ If the line have more picked product than expected,
+        we need to decrease another line and increase if global quantity expected
+        is not reached.
+        qty : new quantity to write
+        pack_op_id: pack operation to update
+        ### DON'T WORK WITH PACKAGE
+        """
+        self.write(cr, uid, id, {'qty_done': qty_done}, context=context)
+        operation = self.browse(cr, uid, id, context=context)
+        missing_qty = operation.qty_done - operation.product_qty
+        if missing_qty <= 0:
+            return True
+        # We've done more than expected: let's hope we'll find other ops to victimize
+        self.write(cr, uid, id, {'product_qty': qty_done}, context=context)
+        victim_ids = self.search(
+            cr, uid, [('picking_id', '=', operation.picking_id.id),
+                      ('product_id', '=', operation.product_id.id),
+                      ('location_dest_id', '=', operation.location_dest_id.id)])
+        while missing_qty > 0:
+            victim_id = victim_ids and victim_ids.pop(0)
+            if not victim_id:
+                raise osv.except_osv(_('Error!'), _('You have picked more product than expected.'))
+            victim = self.browse(cr, uid, victim_id, context=context)
+            victim_remaining_qty = victim.product_qty - victim.qty_done
+            if victim_remaining_qty <= 0:
+                continue
+            qty_to_take = min(victim_remaining_qty, missing_qty)
+            if victim.product_qty == qty_to_take:
+                self.unlink(cr, uid, victim.id, context=context)
+            else:
+                self.write(cr, uid, victim.id, {'product_qty': victim.product_qty - qty_to_take}, context=context)
+            missing_qty -= qty_to_take
+
+        return True
 
 class stock_move_operation_link(osv.osv):
     """
