@@ -189,6 +189,7 @@
                 <form string="Purchase Order">
                 <header>
                     <button name="bid_received" states="sent" string="Bid Received" class="oe_highlight"/>
+                    <button name="send_rfq" states="draft" string="Demande de prix"/>
                     <button name="wkf_send_rfq" states="draft" string="Send RFQ by Email" type="object" context="{'send_rfq':True}" class="oe_highlight"/>
                     <button name="wkf_send_rfq" states="sent" string="Re-Send RFQ by Email" type="object" context="{'send_rfq':True}"/>
                     <button name="print_quotation" string="Print RFQ" type="object" states="draft" class="oe_highlight" groups="base.group_user"/>
