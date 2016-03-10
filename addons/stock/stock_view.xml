@@ -661,7 +661,7 @@
                     </h1>
                     <group>
                         <group>
-                            <field name="partner_id"/>                            
+                            <field name="partner_id" attrs="{'required': [('picking_type_code','in', ['incoming', 'outgoing'])]}"/>
                             <field name="backorder_id" readonly="1" attrs="{'invisible': [('backorder_id','=',False)]}"/>
                         </group>
                         <group>
