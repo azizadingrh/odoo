@@ -858,6 +858,11 @@ class product_template(osv.osv):
                 'res_model': 'product.price.history',
                 'view_mode': 'tree',
                 'domain': [('product_template_id', 'in', ids)],
+                'flags': {
+                    # Create button
+                    'action_buttons': True,
+                    # Delete button
+                    'sidebar': True},
                 'target': 'new'}
 
 class product_product(osv.osv):
@@ -1243,6 +1248,11 @@ class product_product(osv.osv):
                 'view_mode': 'tree',
                 'domain': [('product_template_id', 'in',
                             [p.product_tmpl_id.id for p in products])],
+                'flags': {
+                    # Create button
+                    'action_buttons': True,
+                    # Delete button
+                    'sidebar': True},
                 'target': 'new'}
 
 

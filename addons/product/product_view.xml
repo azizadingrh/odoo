@@ -845,7 +845,7 @@
             <field name="model">product.price.history</field>
             <field name="arch" type="xml">
                 <tree string="Historique du prix de valorisation" editable="top">
-                    <field name="datetime" readonly="1"/>
+                    <field name="datetime"/>
                     <field name="cost"/>
                 </tree>
             </field>
