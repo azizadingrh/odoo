@@ -953,6 +953,15 @@ class stock_picking(osv.osv):
                 self.pool.get('stock.move').action_done(cr, uid, todo, context=context)
         return True
 
+    def action_undone_from_ui(self, cr, uid, ids, context=None):
+        """We must mark the ops unprocessed (the client makes two calls => no rollback)"""
+        if not isinstance(ids, list):
+            ids = [ids]
+        op_obj = self.pool['stock.pack.operation']
+        op_ids = op_obj.search(cr, uid, [('picking_id', 'in', ids)], context=context)
+        op_obj.write(cr, uid, op_ids, {'processed': 'false'}, context=context)
+        return True
+
     def unlink(self, cr, uid, ids, context=None):
         #on picking deletion, cancel its move then unlink them too
         move_obj = self.pool.get('stock.move')

@@ -931,6 +931,12 @@ function openerp_picking_widgets(instance){
                     else {
                         return 0;
                     }
+                }).fail(function(){
+                    new instance.web.Model('stock.picking')
+                        .call('action_undone_from_ui', [self.picking.id])
+                        .then(function(){
+                             return self.refresh_ui(self.picking.id);
+                        })
                 });
         },
         create_lot: function(op_id, lot_name){
