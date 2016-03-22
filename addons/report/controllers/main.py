@@ -115,22 +115,17 @@ class ReportController(Controller):
                 docids = None
                 if '/' in reportname:
                     reportname, docids = reportname.split('/')
-                # decoding the args represented in JSON
-                data = dict(url_decode(url.split('?')[1]).items())
+
                 if docids:
                     # Generic report:
-                    response = self.report_routes(reportname, docids=docids, converter='pdf', **data)
+                    response = self.report_routes(reportname, docids=docids, converter='pdf')
                 else:
                     # Particular report:
-                    response = self.report_routes(reportname, converter='pdf', **data)
+                    data = url_decode(url.split('?')[1]).items()  # decoding the args represented in JSON
+                    response = self.report_routes(reportname, converter='pdf', **dict(data))
 
                 cr, uid = request.cr, request.uid
-                if data.get('context'):
-                    data_context = simplejson.loads(data['context'])
-                else:
-                    data_context = None
-                report = request.registry['report']._get_report_from_name(
-                    cr, uid, reportname, context=data_context)
+                report = request.registry['report']._get_report_from_name(cr, uid, reportname)
                 filename = "%s.%s" % (report.name, "pdf")
                 response.headers.add('Content-Disposition', content_disposition(filename))
                 response.set_cookie('fileToken', token)

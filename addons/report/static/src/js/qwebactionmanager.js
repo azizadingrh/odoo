@@ -40,12 +40,11 @@ openerp.report = function(instance) {
                         break;
                 }
 
-                // generic report: context in query string
+                // generic report: no query string
                 // particular: query string of action.data.form and context
                 if (!('data' in action) || !(action.data)) {
                     if ('active_ids' in action.context) {
                         report_url += "/" + action.context.active_ids.join(',');
-                        report_url += "?context=" + encodeURIComponent(JSON.stringify(action.context));
                     }
                 } else {
                     report_url += "?options=" + encodeURIComponent(JSON.stringify(action.data));
