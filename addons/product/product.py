@@ -186,9 +186,12 @@ class product_uom(osv.osv):
                 return qty
         amount = qty/from_unit.factor
         if to_unit:
-            amount = amount * to_unit.factor
-            if round:
-                amount = float_round(amount, precision_rounding=to_unit.rounding, rounding_method=rounding_method)
+            if to_unit == from_unit:
+                amount = qty
+            else:
+                amount = amount * to_unit.factor
+                if round:
+                    amount = float_round(amount, precision_rounding=to_unit.rounding, rounding_method=rounding_method)
         return amount
 
     def _compute_price(self, cr, uid, from_uom_id, price, to_uom_id=False):

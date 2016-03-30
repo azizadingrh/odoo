@@ -413,7 +413,8 @@ class stock_quant(osv.osv):
         for quant, qty in quants:
             if not quant:
                 #If quant is None, we will create a quant to move (and potentially a negative counterpart too)
-                quant = self._quant_create(cr, uid, qty, move, lot_id=lot_id, owner_id=owner_id, src_package_id=src_package_id, dest_package_id=dest_package_id, force_location_from=location_from, force_location_to=location_to, context=context)
+                if abs(qty) >= move.product_id.uom_id.rounding:
+                    quant = self._quant_create(cr, uid, qty, move, lot_id=lot_id, owner_id=owner_id, src_package_id=src_package_id, dest_package_id=dest_package_id, force_location_from=location_from, force_location_to=location_to, context=context)
             else:
                 self._quant_split(cr, uid, quant, qty, context=context)
                 to_move_quants.append(quant)
@@ -506,6 +507,8 @@ class stock_quant(osv.osv):
         price_unit = self.pool.get('stock.move').get_price_unit(cr, uid, move, context=context)
         location = force_location_to or move.location_dest_id
         rounding = move.product_id.uom_id.rounding
+        if abs(qty) < rounding:
+            raise osv.except_osv(_('Error!'), _("You can't create a quant at zero for product : %s (qty: %f)." % (move.product_id.name, qty)))
         vals = {
             'product_id': move.product_id.id,
             'location_id': location.id,
@@ -542,6 +545,8 @@ class stock_quant(osv.osv):
             return False
         qty_round = float_round(qty, precision_rounding=rounding)
         new_qty_round = float_round(quant.qty - qty, precision_rounding=rounding)
+        if abs(new_qty_round) < rounding:
+            return False
         # Fetch the history_ids manually as it will not do a join with the stock moves then (=> a lot faster)
         cr.execute("""SELECT move_id FROM stock_quant_move_rel WHERE quant_id = %s""", (quant.id,))
         res = cr.fetchall()
