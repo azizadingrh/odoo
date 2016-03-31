@@ -919,9 +919,8 @@ class stock_picking(osv.osv):
                 self.action_confirm(cr, uid, [pick.id], context=context)
             #skip the moves that don't need to be checked
             move_ids = [x.id for x in pick.move_lines if x.state not in ('draft', 'cancel', 'done')]
-            if not move_ids:
-                raise osv.except_osv(_('Warning!'), _('Nothing to check the availability for.'))
-            self.pool.get('stock.move').action_assign(cr, uid, move_ids, context=context)
+            if move_ids:
+                self.pool.get('stock.move').action_assign(cr, uid, move_ids, context=context)
         return True
 
     def force_assign(self, cr, uid, ids, context=None):
