@@ -1,8 +1,14 @@
+# -*- coding: utf-8 -*-
+
+import logging
 
 from datetime import datetime
-from openerp import tools
 from openerp.osv import fields, osv
 from openerp.tools.translate import _
+
+import openerp.addons.decimal_precision as dp
+
+_logger = logging.getLogger(__name__)
 
 class wizard_valuation_history(osv.osv_memory):
 
@@ -24,13 +30,14 @@ class wizard_valuation_history(osv.osv_memory):
         data = self.read(cr, uid, ids, context=context)[0]
         ctx = context.copy()
         ctx['history_date'] = data['date']
+        ctx['search_default_group_by_category'] = True
         ctx['search_default_group_by_product'] = True
-        ctx['search_default_group_by_location'] = True
+        ctx['search_default_group_by_uom_id'] = True
         return {
-            'domain': "[('date', '<=', '" + data['date'] + "')]",
+            'domain': "['|',('date','=',False),('date', '>=', '" + data['date'] + "')]",
             'name': _('Stock Value At Date'),
             'view_type': 'form',
-            'view_mode': 'tree,graph',
+            'view_mode': 'graph,tree',
             'res_model': 'stock.history',
             'type': 'ir.actions.act_window',
             'context': ctx,
@@ -47,7 +54,7 @@ class stock_history(osv.osv):
         if context is None:
             context = {}
         date = context.get('history_date', datetime.now())
-        if 'inventory_value' in fields:
+        if 'inventory_value' in fields or 'standard_price' in fields:
             group_lines = {}
             for line in res:
                 domain = line.get('__domain', domain)
@@ -59,7 +66,7 @@ class stock_history(osv.osv):
             line_ids = list(line_ids)
             lines_rec = {}
             if line_ids:
-                cr.execute('SELECT id, product_id, price_unit_on_quant, company_id, quantity FROM stock_history WHERE id in %s', (tuple(line_ids),))
+                cr.execute('SELECT id, product_id, price_unit_on_quant, company_id, quantity, weight FROM stock_history WHERE id in %s', (tuple(line_ids),))
                 lines_rec = cr.dictfetchall()
             lines_dict = dict((line['id'], line) for line in lines_rec)
             product_ids = list(set(line_rec['product_id'] for line_rec in lines_rec))
@@ -75,6 +82,9 @@ class stock_history(osv.osv):
                 histories_dict[(history['product_template_id'], history['company_id'])] = history['cost']
             for line in res:
                 inv_value = 0.0
+                total_qty = 0.0
+                weight_total = 0.0
+                total_qty_having_weight = 0.0
                 lines = group_lines.get(str(line.get('__domain', domain)))
                 for line_id in lines:
                     line_rec = lines_dict[line_id]
@@ -83,8 +93,21 @@ class stock_history(osv.osv):
                         price = line_rec['price_unit_on_quant']
                     else:
                         price = histories_dict.get((product['product_tmpl_id'][0], line_rec['company_id']), 0.0)
+                    total_qty += line_rec['quantity']
                     inv_value += price * line_rec['quantity']
+                    if line_rec['weight']:
+                        weight_total += line_rec['weight']
+                        total_qty_having_weight += line_rec['quantity']
                 line['inventory_value'] = inv_value
+                # Weighted average
+                line['standard_price'] = (total_qty and
+                                          inv_value / total_qty or
+                                          0.0)
+                # We extrapolate from the partial total of lines having weights
+                # This "masks" the lines which have no weight
+                line['weight'] = (total_qty_having_weight and
+                                  (weight_total /
+                                   total_qty_having_weight) * total_qty or 0.0)
         return res
 
     def _get_inventory_value(self, cr, uid, ids, name, attr, context=None):
@@ -100,6 +123,19 @@ class stock_history(osv.osv):
                 res[line.id] = line.quantity * product_tmpl_obj.get_history_price(cr, uid, line.product_id.product_tmpl_id.id, line.company_id.id, date=date, context=context)
         return res
 
+    def _get_standard_price(self, cr, uid, ids, name, attr, context=None):
+        if context is None:
+            context = {}
+        date = context.get('history_date')
+        product_tmpl_obj = self.pool.get("product.template")
+        res = {}
+        for line in self.browse(cr, uid, ids, context=context):
+            if line.product_id.cost_method == 'real':
+                res[line.id] = line.price_unit_on_quant
+            else:
+                res[line.id] = product_tmpl_obj.get_history_price(cr, uid, line.product_id.product_tmpl_id.id, line.company_id.id, date=date, context=context)
+        return res
+
     _columns = {
         'move_id': fields.many2one('stock.move', 'Stock Move', required=True),
         'location_id': fields.many2one('stock.location', 'Location', required=True),
@@ -108,15 +144,21 @@ class stock_history(osv.osv):
         'product_categ_id': fields.many2one('product.category', 'Product Category', required=True),
         'quantity': fields.float('Product Quantity'),
         'date': fields.datetime('Operation Date'),
-        'price_unit_on_quant': fields.float('Value'),
+        'price_unit_on_quant': fields.float('Value', group_operator = 'avg'),
         'inventory_value': fields.function(_get_inventory_value, string="Inventory Value", type='float', readonly=True),
-        'source': fields.char('Source')
+        'source': fields.char('Source'),
+        'standard_price': fields.function(_get_standard_price, string="Prix de revient", type='float', readonly=True),
+        'uom_id': fields.many2one('product.uom', 'Unité de mesure', required=True),
+        'weight': fields.float('Poids extrapolé', digits_compute=dp.get_precision('Stock Weight')),
+        'list_price': fields.float('Prix de vente', digits_compute=dp.get_precision('Product Price'), group_operator = 'avg')
     }
 
     def init(self, cr):
-        tools.drop_view_if_exists(cr, 'stock_history')
         cr.execute("""
-            CREATE OR REPLACE VIEW stock_history AS (
+            DROP MATERIALIZED VIEW IF EXISTS stock_history
+        """)
+        cr.execute("""
+            CREATE MATERIALIZED VIEW stock_history AS (
               SELECT MIN(id) as id,
                 move_id,
                 location_id,
@@ -126,19 +168,55 @@ class stock_history(osv.osv):
                 SUM(quantity) as quantity,
                 date,
                 SUM(price_unit_on_quant * quantity) / SUM(quantity) as price_unit_on_quant,
-                source
+                source,
+                uom_id,
+                weight,
+                list_price
                 FROM
-                ((SELECT
+                (
+                -- WE START FROM THE STOCK QUANTS
+                (SELECT
+                    quant.id + 1000000000 AS id,
+                    NULL::INT AS move_id,
+                    dest_location.id AS location_id,
+                    dest_location.company_id AS company_id,
+                    quant.product_id AS product_id,
+                    product_template.categ_id AS product_categ_id,
+                    quant.qty AS quantity,
+                    NULL::TIMESTAMP AS date,
+                    quant.cost AS price_unit_on_quant,
+                    'Stock actuel'::TEXT AS source,
+                    product_template.uom_id,
+                    lot.weight_observed * quant.qty AS weight,
+                    product_template.list_price
+                FROM
+                    stock_quant as quant
+                JOIN
+                    product_product ON product_product.id = quant.product_id
+                JOIN
+                   stock_location dest_location ON quant.location_id = dest_location.id
+                JOIN
+                    product_template ON product_template.id = product_product.product_tmpl_id
+                LEFT JOIN
+                    stock_production_lot lot ON quant.lot_id = lot.id AND lot.weight_observed > 0
+                WHERE quant.qty>0 AND
+                    dest_location.usage IN ('internal', 'transit')
+                ) UNION ALL
+                -- We subtract the entering moves as we go back in time
+                (SELECT
                     stock_move.id AS id,
                     stock_move.id AS move_id,
                     dest_location.id AS location_id,
                     dest_location.company_id AS company_id,
                     stock_move.product_id AS product_id,
                     product_template.categ_id AS product_categ_id,
-                    quant.qty AS quantity,
+                    - quant.qty AS quantity,
                     stock_move.date AS date,
                     quant.cost as price_unit_on_quant,
-                    stock_move.origin AS source
+                    COALESCE(stock_move.origin, stock_move.name) AS source,
+                    product_template.uom_id,
+                    - lot.weight_observed * quant.qty AS weight,
+                    product_template.list_price
                 FROM
                     stock_move
                 JOIN
@@ -153,6 +231,8 @@ class stock_history(osv.osv):
                     product_product ON product_product.id = stock_move.product_id
                 JOIN
                     product_template ON product_template.id = product_product.product_tmpl_id
+                LEFT JOIN
+                    stock_production_lot lot ON quant.lot_id = lot.id AND lot.weight_observed > 0
                 WHERE quant.qty>0 AND stock_move.state = 'done' AND dest_location.usage in ('internal', 'transit')
                   AND (
                     (source_location.company_id is null and dest_location.company_id is not null) or
@@ -160,6 +240,7 @@ class stock_history(osv.osv):
                     source_location.company_id != dest_location.company_id or
                     source_location.usage not in ('internal', 'transit'))
                 ) UNION ALL
+                -- We add back outgoing moves as we go back in time
                 (SELECT
                     (-1) * stock_move.id AS id,
                     stock_move.id AS move_id,
@@ -167,10 +248,13 @@ class stock_history(osv.osv):
                     source_location.company_id AS company_id,
                     stock_move.product_id AS product_id,
                     product_template.categ_id AS product_categ_id,
-                    - quant.qty AS quantity,
+                    quant.qty AS quantity,
                     stock_move.date AS date,
                     quant.cost as price_unit_on_quant,
-                    stock_move.origin AS source
+                    COALESCE(stock_move.origin, stock_move.name) AS source,
+                    product_template.uom_id,
+                    lot.weight_observed * quant.qty AS weight,
+                    product_template.list_price
                 FROM
                     stock_move
                 JOIN
@@ -185,6 +269,8 @@ class stock_history(osv.osv):
                     product_product ON product_product.id = stock_move.product_id
                 JOIN
                     product_template ON product_template.id = product_product.product_tmpl_id
+                LEFT JOIN
+                    stock_production_lot lot ON quant.lot_id = lot.id AND lot.weight_observed > 0
                 WHERE quant.qty>0 AND stock_move.state = 'done' AND source_location.usage in ('internal', 'transit')
                  AND (
                     (dest_location.company_id is null and source_location.company_id is not null) or
@@ -193,5 +279,21 @@ class stock_history(osv.osv):
                     dest_location.usage not in ('internal', 'transit'))
                 ))
                 AS foo
-                GROUP BY move_id, location_id, company_id, product_id, product_categ_id, date, source
-            )""")
+                GROUP BY move_id, location_id, company_id, product_id, product_categ_id, date, source, uom_id, weight, list_price
+            ) WITH DATA""")
+        cr.execute("""
+            CREATE INDEX STOCK_HISTORY_ID
+            ON STOCK_HISTORY(ID, COMPANY_ID)
+        """)
+        cr.execute("""
+            CREATE INDEX STOCK_HISTORY_ALL
+            ON STOCK_HISTORY(PRODUCT_ID, COMPANY_ID, DATE, LOCATION_ID, ID)
+        """)
+
+    def refresh(self, cr, uid, context=None):
+        """Refresh the data (to be used in cron jobs"""
+        _logger.info("Refreshing stock history")
+        cr.execute("""
+            REFRESH MATERIALIZED VIEW stock_history
+        """)
+        return True

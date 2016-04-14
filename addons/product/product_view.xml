@@ -89,6 +89,8 @@
                                 <group name="procurement">
                                     <group name="general">
                                         <field name="standard_price"/>
+                                        <button name="action_price_history" type="object"
+                                            class="oe_link" string="Historique"/>
                                     </group>
                                     <group name="procurement_uom" groups="product.group_uom" string="Purchase">
                                         <field name="uom_po_id"/>
@@ -838,6 +840,15 @@
                 </tree>
             </field>
         </record>
-
+        <record id="product_price_history_treeview" model="ir.ui.view">
+            <field name="name">Historique du prix de valorisation</field>
+            <field name="model">product.price.history</field>
+            <field name="arch" type="xml">
+                <tree string="Historique du prix de valorisation" editable="top">
+                    <field name="datetime"/>
+                    <field name="cost"/>
+                </tree>
+            </field>
+        </record>
     </data>
 </openerp>
