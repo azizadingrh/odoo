@@ -67,10 +67,14 @@ msgstr " (réservé)"
 #, python-format
 msgid ""
 "You cannot have two inventory adjustements in state 'in Progess' with the "
-"same product(%s), same location(%s), same package, same owner and same lot. "
+"same product(%s), same location(%s), same package, same owner and same lot(%s). "
 "Please first validate the first inventory adjustement with this product "
 "before creating another one."
 msgstr ""
+"Vous ne pouvez pas avoir 2 inventaires 'en cours' avec les même "
+"produit(%s), même emplacement(%s), même colis, même propriétaire et même lot(%s). "
+"Merci de valider le premier inventaire avec ce produit "
+"avant d'en créer un nouveau."
 
 #. module: stock
 #: code:addons/stock/stock.py:3090
